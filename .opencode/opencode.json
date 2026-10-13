@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "opencode/big-pickle",
+  "permissions": [
+    { "action": "shell", "resource": "git push *", "effect": "ask" }
+  ],
+  "watcher": {
+    "ignore": [".trash/**", "Установочные проги ИИ/**"]
+  },
+  "formatter": true
+}
