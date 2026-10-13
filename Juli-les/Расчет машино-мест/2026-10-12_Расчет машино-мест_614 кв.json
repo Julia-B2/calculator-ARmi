@@ -1,0 +1,51 @@
+{
+  "title": "Расчет машино-мест по 945-ПП",
+  "object": "Молодогвардейская",
+  "apartmentsCount": 614,
+  "methodology": {
+    "groups": [
+      {
+        "group": "до 70 м²",
+        "coefficient": 0.8,
+        "count": 325,
+        "parkingSpaces": 260
+      },
+      {
+        "group": "70-100 м²",
+        "coefficient": 1.2,
+        "count": 176,
+        "parkingSpaces": 211.2
+      },
+      {
+        "group": "свыше 100 м²",
+        "coefficient": 1.6,
+        "count": 113,
+        "parkingSpaces": 180.8
+      }
+    ],
+    "totalPermanent": 652
+  },
+  "additionalComponents": [
+    {
+      "name": "Гостевые ММ (10% от постоянных)",
+      "calculated": 65.2,
+      "value": 66
+    },
+    {
+      "name": "Места для МГН всего (10% от постоянных)",
+      "calculated": 65.2,
+      "value": 66
+    },
+    {
+      "name": "Специализированные ММ для МГН",
+      "value": 16
+    },
+    {
+      "name": "Прочие составляющие (по расчёту v4)",
+      "value": 34
+    }
+  ],
+  "totalRequirement": 752,
+  "totalRequirementFormula": "постоянные + МГН всего + прочие",
+  "note": "квартирография экстраполирована от v3 (618 квартир)"
+}

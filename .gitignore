@@ -1,0 +1,21 @@
+# Служебные файлы Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+desktop.ini
+$RECYCLE.BIN/
+
+# Временные файлы Microsoft Office (в т.ч. файлы-замки открытых документов)
+~$*
+*.tmp
+
+# Корзина Obsidian
+.trash/
+
+# Персональные настройки Obsidian (рабочая область/кэш)
+.obsidian/workspace*.json
+.obsidian/cache
+
+# Тяжёлые установочные файлы (бинарники) — не версионируются
+Установочные проги ИИ/
