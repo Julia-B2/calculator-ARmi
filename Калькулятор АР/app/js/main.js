@@ -15,6 +15,8 @@ import { runNormCheck, renderNormCheck, restoreJournal, getLastJournal, download
 
 let norms = null;
 let lastResult = null;
+// Принятое количество лифтов введено пользователем (например, результат расчёта по ГОСТ Р 52941)
+let elAdoptedManual = false;
 
 // Состояние блока Parking
 const parkingState = {
@@ -23,7 +25,6 @@ const parkingState = {
   // Выбранные функции объекта (чекбоксы в «Исходных данных»). Управляют показом
   // площадей по назначению и составом объектного расчёта.
   functions: ["residential"],
-  designStage: "ПП",
   // Площади по назначению, вместимость, население (вкладка «Исходные данные», единый источник правды)
   inputData: {
     totalArea: 0,
@@ -35,8 +36,18 @@ const parkingState = {
   // Объектно-ориентированные параметры (вкладка «Исходные данные»)
   objParams: { unitsCount: 0, housingClass: "эконом", mallType: "районный", employees: 0 },
   objCoefficients: { otProximity: false, mfn: false, sharedUse: 0 },
-  // Понижающий коэффициент (945-ПП, п. 6.2.4): { optionId, zoneId }
-  reductionK: { optionId: "none", zoneId: null },
+  // Отклонение от расчётного числа мест (945-ПП, п. 6.2.4.1 — постоянные/гостевые/места остановки ±10 %)
+  deviation: { optionId: "none" },
+  // Отклонение для приобъектной парковки (п. 6.2.4.3 — ±30 %)
+  objectDeviation: { optionId: "none" },
+  // К1 — пешевая доступность рельсового каркаса (приложение 6)
+  railZone: { zoneId: null },
+  // К2 — коэффициент деловой активности (приложение 3)
+  k2: 1,
+  // Метод расчёта постоянных мест: "agr" — прил. 5 п. 2, "pz" — прил. 5 п. 1
+  parkingMethod: "agr",
+  // Квартиры для проживания инвалидов (п. 6.2.3.7)
+  invalidApartments: 0,
   // Приобъектные ММ: сценарии. Каждый: { id, label, mode:'bkt'|'functions', f, area, K, functions:{funcId:{K,S}} }
   scenarios: []
 };
@@ -161,21 +172,24 @@ function selectRegion(id) {
     sc.K = regionBktK();
     sc.functions = newFunctionsMap();
   });
-  // сбросить зону понижающего К на первую зону нового региона
-  const zones = currentRegionNorms()?.reductionKZones || [];
-  parkingState.reductionK.zoneId =
-    parkingState.reductionK.optionId === "none" || zones.length === 0 ? null : zones[0].id;
+  // сбросить зону К1 (пешевая доступность рельсового каркаса) на первую зону нового региона
+  const zones = currentRegionNorms()?.railZones || [];
+  parkingState.railZone.zoneId = zones.length ? zones[0].id : null;
   syncNormativeFields();
   updateRegionNote();
   reParking();
   reSocial();
 }
 
-// Нормативные значения — только для чтения: подставляются из нормативной базы
+// Нормативные значения — подставляются из нормативной базы выбранного региона
 function syncNormativeFields() {
   const setVal = (id, v) => {
     const el = document.getElementById(id);
     if (el && v != null && v !== "" && Number(el.value) !== Number(v)) el.value = v;
+  };
+  const setValOrEmpty = (id, v) => {
+    const el = document.getElementById(id);
+    if (el) el.value = v == null ? "" : v;
   };
   const td = norms?.tko?.defaults || {};
   setVal("tkoN", td.n);
@@ -185,13 +199,45 @@ function syncNormativeFields() {
   setVal("tkoKz", td.Kz);
   setVal("tkoKpr", td.Kpr);
 
-  const sd = norms?.social?.defaults || {};
-  setVal("socialPcChild", sd.polyclinicChildPer1000);
-  setVal("socialPcAdult", sd.polyclinicAdultPer1000);
-  setVal("socialPcMixed", sd.polyclinicMixedPer1000);
-  setVal("socialArea", sd.polyclinicAreaPerVisit);
   const rn = currentRegionNorms();
-  if (rn?.social?.sqmPerPerson != null) setVal("socialSqm", rn.social.sqmPerPerson);
+
+  // Тип застройки (ПП № 2152-ПП, таблица 1.4.1): МКД — 50, ИЖД — 56, блокированная — 67, ВГК — 80 м²/чел.
+  const housingTypes = rn?.social?.housingTypes || norms?.social?.defaults?.housingTypes || {};
+  const htSel = document.getElementById("socialHousingType");
+  if (htSel) {
+    const keep = htSel.value;
+    htSel.innerHTML = Object.values(housingTypes)
+      .map((t) => `<option value="${t.id}">${t.label} — ${t.sqm} м²/чел.</option>`)
+      .join("");
+    htSel.value = keep && housingTypes[keep] ? keep : (Object.keys(housingTypes)[0] || "");
+    if (!htSel.dataset.bound) {
+      htSel.dataset.bound = "1";
+      htSel.addEventListener("change", () => {
+        syncNormativeFields();
+        reSocial();
+        reParking();
+      });
+    }
+  }
+  const ht = housingTypes[htSel?.value] || {};
+  const sqm = ht.sqm ?? rn?.social?.sqmPerPerson ?? norms?.social?.defaults?.sqmPerPerson;
+  if (sqm != null) {
+    setVal("socialSqm", sqm);
+    setVal("parkingSqmPerPerson", sqm);
+  }
+
+  // Поликлиники — региональные нормативы в области здравоохранения
+  const pc = rn?.social?.polyclinic || {};
+  setValOrEmpty("socialPcChild", pc.childPer1000);
+  setValOrEmpty("socialPcAdult", pc.adultPer1000);
+  setValOrEmpty("socialPcMixed", pc.mixedPer1000);
+  setValOrEmpty("socialArea", pc.areaPerVisit);
+  const pcSrc = document.getElementById("socialPcSource");
+  if (pcSrc) {
+    pcSrc.textContent = pc.source
+      ? `Источник: ${pc.source}.${pc.note ? " " + pc.note : ""}`
+      : "Источник: РНГП/МНГП региона в области здравоохранения — значения не заданы, введите их вручную по региональному нормативу.";
+  }
 }
 
 // --- Рендер вкладки «Исходные данные» (тип объекта, класс, ТЦ, офис, коэффициенты) ---
@@ -255,14 +301,6 @@ function renderInputTab() {
   };
   bindNum("objUnits", "unitsCount");
   bindNum("objEmployees", "employees");
-
-  // Стадия проектирования (ПП / ПД)
-  const dsSel = document.getElementById("designStageSelect");
-  if (dsSel && !dsSel.dataset.bound) {
-    dsSel.dataset.bound = "1";
-    dsSel.value = parkingState.designStage;
-    dsSel.addEventListener("change", () => { parkingState.designStage = dsSel.value; reParking(); });
-  }
 
   // Общая площадь, площади по назначению, вместимость, загрузка, население
   const idm = parkingState.inputData;
@@ -424,7 +462,6 @@ function parkingInputs() {
     objectName: fieldValue("objectName"),
     objectType: type,
     functions,
-    designStage: parkingState.designStage,
     apartmentsTotal: toNumber(fieldValue("apartmentsTotal"), 0),
     f1: toNumber(fieldValue("f1"), 0),
     f2: toNumber(fieldValue("f2"), 0),
@@ -439,7 +476,16 @@ function parkingInputs() {
     population: ["жилой", "офисный", "многофункциональный"].includes(type) ? idm.population : 0,
     correctionFactor: toNumber(fieldValue("pmCorrection"), 1),
     regionId: parkingState.regionId,
-    reductionK: parkingState.reductionK,
+    // Метод расчёта постоянных мест (945-ПП, прил. 5): "agr" — п. 2, "pz" — п. 1
+    parkingMethod: parkingState.parkingMethod,
+    apartArea: toNumber(fieldValue("apartArea"), 0),
+    sqmPerPerson: toNumber(fieldValue("parkingSqmPerPerson"), 0),
+    // Отклонения от расчётного числа мест (п. 6.2.4) и коэффициенты приложения 6
+    deviation: parkingState.deviation,
+    objectDeviation: parkingState.objectDeviation,
+    railZone: parkingState.railZone,
+    k2: toNumber(fieldValue("objK2"), 1),
+    invalidApartments: toNumber(fieldValue("invalidApartments"), 0),
     scenarios: parkingState.scenarios,
     summary: fieldValue("specialConditions")
   };
@@ -469,18 +515,22 @@ function renderObjectFacilities(b) {
               <td class="center">${r && r.functions[0] ? fmtRu(r.functions[0].raw, 3) : "—"}</td>
             </tr></tbody></table>`;
         } else {
-          // Режим «Функционал»: коэффициент не показываем
+          // Режим «Функционал»: X / X2 (прил. 1) либо S / 100 × K (СП 42.13330.2026, прил. И)
+          const calcRows = r?.functions || [];
           const funcRows = cfg.functions
             .map((fn) => {
               const v = sc.functions[fn.id] || { K: fn.K, S: 0 };
+              const cr = calcRows.find((x) => x.id === fn.id);
+              const basis = cr ? `${cr.basis}${cr.x2 ? ` (X2 = ${cr.x2})` : ""}` : "—";
               return `<tr>
-                <td>${fn.label}</td>
+                <td>${fn.label}${fn.vri ? ` <span class="muted">(ВРИ ${fn.vri})</span>` : ""}</td>
                 <td class="center"><input type="number" class="manual-input" data-sc="${idx}" data-fn="${fn.id}" data-s="1" value="${v.S}" min="0" step="1"></td>
-                <td class="center ref-value">${fmtRu(v.S / 100 * v.K, 3)}</td>
+                <td class="center muted">${basis}</td>
+                <td class="center ref-value">${cr ? fmtRu(cr.raw, 3) : "—"}</td>
               </tr>`;
             })
             .join("");
-          bodyHtml = `<table><thead><tr><th>Функция объекта</th><th class="center">Площадь, м²</th><th class="center">Машино-мест</th></tr></thead><tbody>${funcRows}</tbody></table>`;
+          bodyHtml = `<table><thead><tr><th>Функция объекта</th><th class="center">Площадь, м²</th><th class="center">Расчётная база</th><th class="center">Машино-мест</th></tr></thead><tbody>${funcRows}</tbody></table>`;
         }
 
         return `<div class="scenario-title">Функция коммерческих помещений — режим
@@ -491,7 +541,7 @@ function renderObjectFacilities(b) {
           </div>
           <fieldset class="scenario">
           ${bodyHtml}
-          <div class="muted">N_баз = ${r ? fmtRu(r.afterF, 3) : "—"} → ${r ? r.places : 0} мест${isMax ? " (принят максимум)" : ""}</div>
+          <div class="muted">База ${r ? fmtRu(r.sumRaw, 3) : "—"} → с К1 и К2: ${r ? fmtRu(r.withK, 3) : "—"} → ${r ? r.places : 0} мест${isMax ? " (принят максимум)" : ""}</div>
         </fieldset>`;
       })
       .join("");
@@ -521,61 +571,120 @@ function renderObjectFacilities(b) {
   // Итоговая строка по сценариям
   const res = document.getElementById("objectFacilitiesResult");
   if (res && of) {
-    res.innerHTML = of.results
-      .map((r) => `${r.mode === "bkt" ? "БКТ" : "Функционал"}: N_баз = ${fmtRu(r.afterF, 3)} → <strong>${r.places}</strong> мест`)
-      .join(" &nbsp;|&nbsp; ") + (of.maxScenario ? ` &nbsp;→&nbsp; принято по максимуму: <strong>${of.places}</strong>` : "");
+    res.innerHTML =
+      (of.basis ? `<div>Основание расчёта: ${of.basis}.</div>` : "") +
+      (of.k1Note ? `<div>${of.k1Note}</div>` : "") +
+      (of.k2Note ? `<div>${of.k2Note}</div>` : "") +
+      of.results
+        .map((r) => `${r.mode === "bkt" ? "БКТ" : "Функционал"}: база ${fmtRu(r.sumRaw, 3)} → ${fmtRu(r.withK, 3)} → <strong>${r.places}</strong> мест`)
+        .join(" &nbsp;|&nbsp; ") + (of.maxScenario ? ` &nbsp;→&nbsp; принято по максимуму: <strong>${of.places}</strong>` : "");
   }
 }
 
+// Показ полей метода «градостроительное проектирование» (прил. 5, п. 1)
+function updateParkingMethodVisibility() {
+  const wrap = document.getElementById("pzInputs");
+  if (!wrap) return;
+  wrap.style.display = parkingState.parkingMethod === "pz" ? "" : "none";
+}
+
 function renderParking(b) {
-  const rkCfg = norms.parking.reductionK;
+  const pmCfg = norms.parking.permanentMethod || {};
+  const devCfg = norms.parking.deviation || {};
   const isResidential = (b.objectType || "жилой") === "жилой";
 
-  // Понижающий К/зона — только для жилого (для ТЦ/офиса/МФН коэффициент ОТ задаётся в «Исходных данных»)
+  // Инструмент коэффициентов — только для жилого (для ТЦ/офиса/МФН коэффициент ОТ задаётся в «Исходных данных»)
   const coefToolbar = document.getElementById("permCoefToolbar");
   if (coefToolbar) coefToolbar.style.display = isResidential ? "" : "none";
 
-  // --- Селектор «Понижающий К» ---
-  const rkSel = document.getElementById("reductionKSelect");
-  if (rkSel && rkCfg) {
-    rkSel.innerHTML = rkCfg.options
-      .map((o) => `<option value="${o.id}">${o.label}</option>`)
+  // --- Метод расчёта постоянных мест (приложение 5) ---
+  const methodSel = document.getElementById("parkingMethodSelect");
+  if (methodSel) {
+    methodSel.innerHTML = [pmCfg.agr, pmCfg.pz]
+      .filter(Boolean)
+      .map((m) => `<option value="${m.id}">${m.label}</option>`)
       .join("");
-    rkSel.value = parkingState.reductionK.optionId || rkCfg.defaultOption || "none";
-    if (!rkSel.dataset.bound) {
-      rkSel.dataset.bound = "1";
-      rkSel.addEventListener("change", () => {
-        parkingState.reductionK.optionId = rkSel.value;
-        const zones = currentRegionNorms()?.reductionKZones || [];
-        parkingState.reductionK.zoneId =
-          rkSel.value === "none" || zones.length === 0 ? null : zones[0].id;
+    methodSel.value = parkingState.parkingMethod || pmCfg.defaultMethod || "agr";
+    if (!methodSel.dataset.bound) {
+      methodSel.dataset.bound = "1";
+      methodSel.addEventListener("change", () => {
+        parkingState.parkingMethod = methodSel.value;
+        updateParkingMethodVisibility();
         reParking();
       });
     }
   }
 
-  // --- Зона доступности (k из региона/уровня) ---
-  const zoneWrap = document.getElementById("reductionZoneWrap");
-  const zoneSel = document.getElementById("reductionZoneSelect");
-  const zoneList = currentRegionNorms()?.reductionKZones || [];
-  if (zoneWrap && zoneSel) {
-    if (isResidential && parkingState.reductionK.optionId !== "none" && zoneList.length > 0) {
-      zoneWrap.style.display = "";
-      zoneSel.innerHTML = zoneList
-        .map((z) => `<option value="${z.id}">${z.label} — k = ${z.k}</option>`)
-        .join("");
-      zoneSel.value = parkingState.reductionK.zoneId || zoneList[0].id;
-      if (!zoneSel.dataset.bound) {
-        zoneSel.dataset.bound = "1";
-        zoneSel.addEventListener("change", () => {
-          parkingState.reductionK.zoneId = zoneSel.value;
-          reParking();
-        });
-      }
-    } else {
-      zoneWrap.style.display = "none";
+  // --- Отклонение от расчётного числа мест (п. 6.2.4.1, ±10 %) ---
+  const devSel = document.getElementById("deviationSelect");
+  if (devSel && devCfg.options) {
+    devSel.innerHTML = devCfg.options
+      .map((o) => `<option value="${o.id}">${o.label}</option>`)
+      .join("");
+    devSel.value = parkingState.deviation.optionId || devCfg.defaultOption || "none";
+    if (!devSel.dataset.bound) {
+      devSel.dataset.bound = "1";
+      devSel.addEventListener("change", () => {
+        parkingState.deviation.optionId = devSel.value;
+        reParking();
+      });
     }
   }
+
+  // --- Отклонение для приобъектной парковки (п. 6.2.4.3, ±30 %) ---
+  const objDevSel = document.getElementById("objectDeviationSelect");
+  if (objDevSel && devCfg.objectOptions) {
+    objDevSel.innerHTML = devCfg.objectOptions
+      .map((o) => `<option value="${o.id}">${o.label}</option>`)
+      .join("");
+    objDevSel.value = parkingState.objectDeviation.optionId || "none";
+    if (!objDevSel.dataset.bound) {
+      objDevSel.dataset.bound = "1";
+      objDevSel.addEventListener("change", () => {
+        parkingState.objectDeviation.optionId = objDevSel.value;
+        reParking();
+      });
+    }
+  }
+
+  // --- К1: пешевая доступность рельсового каркаса (приложение 6) ---
+  const zoneWrap = document.getElementById("railZoneWrap");
+  const zoneSel = document.getElementById("railZoneSelect");
+  const zoneList = currentRegionNorms()?.railZones || [];
+  if (zoneWrap && zoneSel) {
+    zoneWrap.style.display = zoneList.length ? "" : "none";
+    zoneSel.innerHTML = zoneList
+      .map((z) => `<option value="${z.id}">${z.label} — К1 = ${z.k}</option>`)
+      .join("");
+    zoneSel.value = parkingState.railZone.zoneId || zoneList[0]?.id || "";
+    if (!zoneSel.dataset.bound) {
+      zoneSel.dataset.bound = "1";
+      zoneSel.addEventListener("change", () => {
+        parkingState.railZone.zoneId = zoneSel.value;
+        reParking();
+      });
+    }
+  }
+
+  // --- К2 и квартиры для инвалидов ---
+  const k2El = document.getElementById("objK2");
+  if (k2El && !k2El.dataset.bound) {
+    k2El.dataset.bound = "1";
+    k2El.addEventListener("change", () => {
+      parkingState.k2 = toNumber(k2El.value, 1);
+      reParking();
+    });
+  }
+  const invEl = document.getElementById("invalidApartments");
+  if (invEl && !invEl.dataset.bound) {
+    invEl.dataset.bound = "1";
+    invEl.addEventListener("change", () => {
+      parkingState.invalidApartments = toNumber(invEl.value, 0);
+      reParking();
+    });
+  }
+
+  updateParkingMethodVisibility();
 
   // --- Постоянные (заголовок таблицы зависит от типа объекта) ---
   const permHead = document.querySelector("#parkingPermanent thead tr");
@@ -589,10 +698,13 @@ function renderParking(b) {
     tbody.innerHTML = b.permanent.byGroups
       .map(
         (g) =>
-          `<tr><td>${g.label}</td><td class="num">${fmtRu(g.count, 0)}</td><td class="num">${g.coefficient}</td><td class="num">${fmtRu(g.spaces, 0)}</td><td>${g.refPoint}</td></tr>`
+          `<tr><td>${g.label}</td><td class="num">${g.count === "" ? "—" : fmtRu(g.count, 0)}</td><td class="num">${g.coefficient}</td><td class="num">${fmtRu(g.spacesRawK, 3)}</td><td>${g.refPoint || b.permanent.refPoint || ""}</td></tr>`
       )
       .join("");
-    tbody.innerHTML += `<tr class="total"><td>Итого постоянных ММ</td><td class="num">${fmtRu(b.permanent.sumF, 0)}</td><td></td><td class="num">${fmtRu(b.permanent.Nn, 0)}</td><td>РНГП/МНГП региона</td></tr>`;
+    const invalidRow = b.permanent.invalidPlaces > 0
+      ? `<tr><td>В том числе места постоянного размещения для инвалидов</td><td class="num">—</td><td class="num">1 место / квартиру</td><td class="num">${fmtRu(b.permanent.invalidPlaces, 0)}</td><td>ПП № 945-ПП, п. 6.2.3.7</td></tr>`
+      : "";
+    tbody.innerHTML += `${invalidRow}<tr class="total"><td>Итого постоянных ММ (округление итога вверх)</td><td class="num">${fmtRu(b.permanent.sumF, 0)}</td><td></td><td class="num">${fmtRu(b.permanent.Nn, 0)}</td><td>ПП № 945-ПП, прил. 5</td></tr>`;
   } else {
     tbody.innerHTML = b.permanent.byGroups
       .map(
@@ -624,12 +736,27 @@ function renderParking(b) {
     let note = !isResidential
       ? "Коэффициенты объекта (ОТ / МФН / совместное использование) задаются в разделе «Исходные данные»."
       : k !== 1
-        ? `Понижающий коэффициент применён: ${b.reduction?.label || ""} (k = ${k}). N = ⌈N_расч × k⌉.`
-        : "Справочно: понижающий коэффициент по 945-ПП (п. 6.2.4) не применён (k = 1).";
+        ? `Допустимое отклонение от расчётного числа мест применено: ${b.deviation?.label || ""} (k = ${k}). N = ⌈N_расч × k⌉. Отклонение более 10 % — решение ГЗК Москвы (п. 6.2.4.2).`
+        : "Справочно: отклонение от расчётного числа мест не применяется (k = 1,0) — п. 6.2.4.1 ПП № 945-ПП.";
+    if (isResidential && b.permanent.method) {
+      note += ` Метод: ${b.permanent.methodLabel || b.permanent.method} — ${b.permanent.formula || ""}.`;
+    }
+    if (b.guestCheck && !b.guestCheck.ok) {
+      note += ` ${b.guestCheck.note}.`;
+    }
     if ((b.federalApplied || []).length) {
       note += ` Фед. минимум (Приказ № 250/пр): ${b.federalApplied.join("; ")} — приняты федеральные значения.`;
     }
     rkNote.textContent = note;
+  }
+
+  // --- Предельно допустимая удалённость машиномест (п. 6.1.2.5) ---
+  const accEl = document.getElementById("parkingAccessibility");
+  if (accEl && b.accessibility) {
+    accEl.textContent =
+      `${b.accessibility.refPoint}: ` +
+      b.accessibility.rows.map((r) => `${r.type} — ${r.limit}`).join("; ") +
+      `. ${b.accessibility.note}`;
   }
 
   // --- Дополнительно (Гостевые ММ) ---
@@ -732,7 +859,7 @@ function renderParkingSummary(b) {
 
   rows.push([
     "Постоянные машино-места", fmtRu(b.permanent.Nn, 0), "шт.",
-    `N_расч × k × K_корр, округление вверх; стадия ${b.inputs?.designStage || "—"}`,
+    "N_расч × k × K_корр, округление вверх",
     regionRef
   ]);
   (b.additional || [])
@@ -850,10 +977,13 @@ function reSocial() {
     return;
   }
 
-  // Нормативная площадь на человека — из РНГП/МНГП региона (поле только для чтения)
+  // Нормативная площадь на человека — из РНГП/МНГП региона и типа застройки (ПП № 2152-ПП, табл. 1.4.1)
   const rnSocial = currentRegionNorms()?.social;
   const sqmEl = document.getElementById("socialSqm");
-  if (sqmEl && rnSocial?.sqmPerPerson != null) sqmEl.value = rnSocial.sqmPerPerson;
+  const housingTypes = rnSocial?.housingTypes || norms.social.defaults.housingTypes || {};
+  const htId = document.getElementById("socialHousingType")?.value || Object.keys(housingTypes)[0];
+  const ht = housingTypes[htId] || {};
+  if (sqmEl && (ht.sqm ?? rnSocial?.sqmPerPerson) != null) sqmEl.value = ht.sqm ?? rnSocial.sqmPerPerson;
 
   // зоны обеспеченности — из выбранного региона
   const regSocial = currentRegion()?.social || null;
@@ -879,18 +1009,21 @@ function reSocial() {
     familyCoefficients[el.dataset.fam] = toNumber(el.value, 0);
   });
 
+  const regPc = currentRegionNorms()?.social?.polyclinic || {};
   const inputs = {
     populationMethod: method,
     regionId: parkingState.regionId,
+    socialSpp: toNumber(fieldValue("socialSpp"), 0),
     socialSq: toNumber(fieldValue("socialSq"), 0),
     sqmPerPerson: toNumber(fieldValue("socialSqm"), norms.social.defaults.sqmPerPerson),
+    housingType: htId,
     zone: document.getElementById("socialZone").value,
     apartmentCounts,
     familyCoefficients,
-    polyclinicChildPer1000: toNumber(fieldValue("socialPcChild"), norms.social.defaults.polyclinicChildPer1000),
-    polyclinicAdultPer1000: toNumber(fieldValue("socialPcAdult"), norms.social.defaults.polyclinicAdultPer1000),
-    polyclinicMixedPer1000: toNumber(fieldValue("socialPcMixed"), norms.social.defaults.polyclinicMixedPer1000),
-    polyclinicAreaPerVisit: toNumber(fieldValue("socialArea"), norms.social.defaults.polyclinicAreaPerVisit),
+    polyclinicChildPer1000: toNumber(fieldValue("socialPcChild"), regPc.childPer1000),
+    polyclinicAdultPer1000: toNumber(fieldValue("socialPcAdult"), regPc.adultPer1000),
+    polyclinicMixedPer1000: toNumber(fieldValue("socialPcMixed"), regPc.mixedPer1000),
+    polyclinicAreaPerVisit: toNumber(fieldValue("socialArea"), regPc.areaPerVisit),
     existingPlaces: toNumber(fieldValue("socialExisting"), 0)
   };
   const b = calculateSocial(norms, inputs);
@@ -923,7 +1056,7 @@ function reSocial() {
     .join("");
 
   // показать/скрыть поля метода
-  document.querySelectorAll(".method-area").forEach((el) => (el.style.display = method === "area" ? "" : "none"));
+  document.querySelectorAll(".method-area").forEach((el) => (el.style.display = method === "types" ? "none" : ""));
   document.querySelectorAll(".method-types").forEach((el) => (el.style.display = method === "types" ? "" : "none"));
 
   if (!lastResult) lastResult = createResult({});
@@ -933,20 +1066,31 @@ function reSocial() {
 
 function reElevators() {
   const idm = parkingState.inputData;
+  const apartmentAreas = {};
+  for (let i = 1; i <= 6; i++) {
+    const v = toNumber(fieldValue(`elApt${i}`), 0);
+    if (v > 0) apartmentAreas[String(i)] = v;
+  }
   const inputs = {
     floors: toNumber(fieldValue("elFloors"), norms.elevators?.defaults?.floors || 10),
     purpose: document.getElementById("elPurpose")?.value || "residential",
+    mode: document.getElementById("elMode")?.value || "table",
     passengerFlow: toNumber(fieldValue("elFlow"), 0),
     loadCapacity: toNumber(fieldValue("elLoad"), norms.elevators?.defaults?.loadCapacity || 400),
     speed: toNumber(fieldValue("elSpeed"), norms.elevators?.defaults?.speed || 1),
     adopted: toNumber(fieldValue("elAdopted"), 0),
+    floorArea: toNumber(fieldValue("elFloorArea"), 0),
+    floorHeight: toNumber(fieldValue("elFloorHeight"), 0),
+    peopleArea: toNumber(fieldValue("elPeopleArea"), 0),
+    apartmentAreas,
     capacity: idm.capacity,
     occupancy: idm.occupancy
   };
   let b = calculateElevators(norms, inputs);
 
-  // Нормативные/расчётные параметры лифтов — только для чтения:
-  // подставляем рекомендуемые значения по СП/ГОСТ и принятое количество.
+  // Нормативные параметры лифтов по таблице В.1 СП 54.13330.2022 — только для чтения.
+  // Принятое количество: заполняется автоматически, пока пользователь не ввёл своё
+  // (например, результат расчёта по ГОСТ Р 52941).
   const fLoad = document.getElementById("elLoad");
   const fSpeed = document.getElementById("elSpeed");
   const fAdopted = document.getElementById("elAdopted");
@@ -959,7 +1103,7 @@ function reElevators() {
     fSpeed.value = b.calc.recSpeed;
     synced = true;
   }
-  if (fAdopted && Number(fAdopted.value) !== Number(b.calc.adopted)) {
+  if (fAdopted && !elAdoptedManual && Number(fAdopted.value) !== Number(b.calc.adopted)) {
     fAdopted.value = b.calc.adopted;
     synced = true;
   }
@@ -978,7 +1122,7 @@ function reElevators() {
       .map((i) => `<tr><td>${escapeHtml(i.name)}</td><td>${i.unit}</td><td class="num">${fmtRu(i.value, 3)}</td><td>${escapeHtml(i.refPoint || "—")}</td></tr>`)
       .join("");
   }
-  setText("elTotal", `Итог: принято ${b.calc.adopted} лифт(ов) (минимум по СП — ${b.calc.min})`);
+  setText("elTotal", `Итог: принято ${b.calc.adopted} лифт(ов) (минимум по таблице В.1 СП 54.13330.2022 — ${b.calc.min})`);
   const note = document.getElementById("elNote");
   if (note) note.textContent = b.calc.ruleNote || "";
   const val = document.getElementById("elValidation");
@@ -1025,7 +1169,12 @@ function init() {
   document.getElementById("btnCalc").addEventListener("click", calculateAll);
   document.getElementById("btnDoc").addEventListener("click", () => exportHtml());
   document.getElementById("btnXlsx").addEventListener("click", () => {
-    if (lastResult) { lastResult.normJournal = getLastJournal(); lastResult.meta = exportMeta(); }
+    if (!lastResult) {
+      alert("Сначала выполните расчёт (кнопка «Рассчитать») — выгружать нечего.");
+      return;
+    }
+    lastResult.normJournal = getLastJournal();
+    lastResult.meta = exportMeta();
     exportXlsx(lastResult);
   });
 
@@ -1045,17 +1194,25 @@ function init() {
   const btnWord = document.getElementById("btnExportWord");
   if (btnWord) btnWord.addEventListener("click", () => withResult((r) => downloadWordDocument(r, exportMeta())));
 
-  // Квартиры F1/F2/F3: «Количество квартир, всего» и постоянные ММ пересчитываются автоматически
-  ["f1", "f2", "f3"].forEach((id) => {
+  // Квартиры F1/F2/F3 и площади для метода ПЗ: «Количество квартир, всего» и постоянные ММ пересчитываются автоматически
+  ["f1", "f2", "f3", "apartArea"].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.addEventListener("input", reParking);
   });
 
-  // Пересчёт social при изменении метода/зоны
+  // Пересчёт social при изменении метода/зоны/исходных данных
   const sm = document.getElementById("socialMethod");
   const sz = document.getElementById("socialZone");
   if (sm) sm.addEventListener("change", reSocial);
   if (sz) sz.addEventListener("change", reSocial);
+  ["socialSpp", "socialSq"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("input", reSocial);
+  });
+  ["socialPcChild", "socialPcAdult", "socialPcMixed", "socialArea"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("input", reSocial);
+  });
 
   // Соцобеспечение: существующая обеспеченность, вывод (dirty — ручная правка сохраняется)
   const se = document.getElementById("socialExisting");
@@ -1063,13 +1220,20 @@ function init() {
   const scEl = document.getElementById("socialConclusion");
   if (scEl) scEl.addEventListener("input", () => { scEl.dataset.dirty = "1"; });
 
-  // Лифты: этажность, назначение, пассажиропоток, параметры, принятое количество
-  ["elFloors", "elFlow", "elLoad", "elSpeed", "elAdopted"].forEach((id) => {
+  // Лифты: этажность, назначение, режим расчёта, исходные данные, параметры
+  ["elFloors", "elFlow", "elLoad", "elSpeed", "elFloorArea", "elFloorHeight", "elPeopleArea",
+    "elApt1", "elApt2", "elApt3", "elApt4", "elApt5", "elApt6"].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.addEventListener("input", reElevators);
   });
+  const elAdoptedEl = document.getElementById("elAdopted");
+  if (elAdoptedEl) {
+    elAdoptedEl.addEventListener("input", () => { elAdoptedManual = true; reElevators(); });
+  }
   const elp = document.getElementById("elPurpose");
   if (elp) elp.addEventListener("change", () => { elp.dataset.touched = "1"; reElevators(); });
+  const elm = document.getElementById("elMode");
+  if (elm) elm.addEventListener("change", reElevators);
 
   // ТКО: сезонный коэффициент и плотность
   ["tkoSeason", "tkoDensity"].forEach((id) => {

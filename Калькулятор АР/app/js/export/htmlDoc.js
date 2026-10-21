@@ -79,22 +79,20 @@ function blockParking(b) {
     const of = b.objectFacilities;
     const maxSc = of.maxScenario;
     const isBkt = maxSc.mode === "bkt";
-    const ofRows = isBkt
-      ? maxSc.functions.map((f) => [f.label, fmtRu(f.S, 0), f.K, fmtRu(f.raw, 3)])
-      : maxSc.functions.map((f) => [f.label, fmtRu(f.S, 0), f.K, fmtRu(f.raw, 3)]);
-    ofRows.push(["Итого Σ (S/100 × K)", "", "", fmtRu(maxSc.sumRaw, 3)]);
-    ofRows.push([`С учётом f = ${maxSc.f} → мест`, "", "", fmtRu(maxSc.places, 0)]);
-    const scenRows = of.results.map((r) => [r.label, r.mode === "bkt" ? "БКТ" : "Функционал", r.f, fmtRu(r.afterF, 3), fmtRu(r.places, 0)]);
+    const ofRows = maxSc.functions.map((f) => [f.label, fmtRu(f.S, 0), f.basis, f.x2 ?? "—", fmtRu(f.raw, 3)]);
+    ofRows.push(["Итого Σ (база)", "", "", "", fmtRu(maxSc.sumRaw, 3)]);
+    ofRows.push([`С учётом К1 = ${of.k1} и К2 = ${of.k2} → мест`, "", "", "", fmtRu(maxSc.places, 0)]);
+    const scenRows = of.results.map((r) => [r.label, r.mode === "bkt" ? "БКТ" : "Функционал", fmtRu(r.sumRaw, 3), fmtRu(r.withK, 3), fmtRu(r.places, 0)]);
     const regionInfo = of.region
       ? `<p class="muted">Регион (нормативная база): <strong>${escapeHtml(of.region.label)}</strong> — ${escapeHtml(of.region.source || "")}</p>`
       : "";
     objectHtml = `
     <h3>1.2. Приобъектные (коммерция)</h3>
     ${regionInfo}
-    <p class="muted">Формула: N = S / 100 × K × f. «БКТ» — один общий K на весь объект; «Функционал» — разбивка по функциональным группам. Коэффициенты K — справочные (из нормативной базы региона).</p>
-    ${table(["Функция / показатель", "Площадь S_i, м²", "K_i, мест/100 м²", "Машино-мест"], ofRows)}
+    <p class="muted">Формула (приложение 6 ПП № 945-ПП): Nв = X / X2 × К1 × К2; X2 — приложение 1. ${escapeHtml(of.basis || "")}.</p>
+    ${table(["Функция / показатель", "Площадь S_i, м²", "Расчётная база", "X2, м²/место", "Машино-мест"], ofRows)}
     <p>Принятый сценарий (максимум): ${escapeHtml(maxSc.label)} [${isBkt ? "БКТ" : "Функционал"}] → <strong>${fmtRu(maxSc.places, 0)} машино-мест</strong></p>
-    ${table(["Сценарий использования", "Режим", "Коэффициент f", "N_баз после f", "Мест"], scenRows)}
+    ${table(["Сценарий использования", "Режим", "База Σ", "После К1 и К2", "Мест"], scenRows)}
     `;
   }
 
@@ -110,9 +108,9 @@ function blockParking(b) {
   ${table(permHeader, permRows)}
   <p class="muted">${
     isResidential && b.permanent?.k && b.permanent.k !== 1
-      ? `Понижающий коэффициент применён: ${escapeHtml(b.reduction?.label || "")} (k = ${b.permanent.k}). N = ⌈N_расч × k⌉.`
+      ? `Допустимое отклонение от расчётного числа мест применено: ${escapeHtml(b.deviation?.label || "")} (k = ${b.permanent.k}). N = ⌈N_расч × k⌉ (п. 6.2.4.1; отклонение более 10 % — решение ГЗК Москвы, п. 6.2.4.2).`
       : isResidential
-        ? "Справочно: понижающий коэффициент по РНГП/МНГП региона не применён (k = 1)."
+        ? "Справочно: отклонение от расчётного числа мест не применяется (k = 1,0) — п. 6.2.4.1 ПП № 945-ПП."
         : "Коэффициенты объекта (ОТ / МФН / совместное использование) — в таблице выше."
   }</p>
   ${objectHtml}
@@ -230,7 +228,6 @@ export function buildHtmlDocument(result) {
   const objectName = result.inputs?.objectName || "—";
   const regionLabel = br.parking?.region?.label || br.social?.region?.label || "—";
   const objectType = br.parking?.objectType || "—";
-  const stage = br.parking?.inputs?.designStage || "—";
   const meta = result.meta || {};
   const assumptions = buildAssumptions(br);
   const journal = result.normJournal;
@@ -258,7 +255,7 @@ export function buildHtmlDocument(result) {
   <h1>Расчёт проектных показателей</h1>
   <div class="meta">
     Объект: ${escapeHtml(objectName)}<br>
-    Регион (РНГП/МНГП): ${escapeHtml(regionLabel)} · Тип объекта: ${escapeHtml(objectType)} · Стадия: ${escapeHtml(stage)}<br>
+    Регион (РНГП/МНГП): ${escapeHtml(regionLabel)} · Тип объекта: ${escapeHtml(objectType)}<br>
     Исполнитель: ${escapeHtml(meta.executor || "—")} · Проверено ГИП: ${escapeHtml(meta.gip || "—")} · Дата расчёта: ${escapeHtml(meta.date || todayISO())}<br>
     Разделы: Сводная таблица · Машиноместа · Лифты${br.social ? " · Социальное обеспечение" : ""} · ТКО · Допущения${journal ? " · Журнал проверки норм" : ""}
   </div>

@@ -17,7 +17,7 @@ function secParking(p) {
   const k = p.permanent?.k;
   const corr = cm.correction;
   const ks = [];
-  if (k != null && k !== 1) ks.push(`k = ${k} (${p.reduction?.label || "по транспортной доступности"})`);
+  if (k != null && k !== 1) ks.push(`k = ${k} (${p.deviation?.label || "допустимое отклонение по п. 6.2.4.1 ПП № 945-ПП"})`);
   if (corr != null && corr !== 1) ks.push(`K_корр = ${corr} (по заданию на проектирование)`);
   parts.push(`Учтены коэффициенты: ${ks.length ? ks.join(", ") : "не применялись (k = 1, K_корр = 1)"}, а также планировочная ситуация участка.`);
   if ((p.federalApplied || []).length) {
@@ -44,7 +44,7 @@ function secSocial(s) {
   const parts = [];
   const regionRef = s.region ? `РНГП/МНГП региона «${s.region.label}»` : "РНГП/МНГП региона";
   parts.push(`Обеспеченность объектами социальной инфраструктуры рассчитана по нормативам, установленным ${regionRef} (зона «${s.zone?.label || "—"}»: ДОУ — ${s.zone?.douPer1000 ?? "—"}, школы — ${s.zone?.schoolPer1000 ?? "—"} мест на 1000 жителей).`);
-  parts.push(`Расчётная численность населения принята ${fmtRu(c.population, 0)} чел. (${s.populationMethod === "types" ? "по типам квартир с учётом коэффициента семейности" : "по площади квартир"}).`);
+  parts.push(`Расчётная численность населения принята ${fmtRu(c.population, 0)} чел. (${s.populationMethod === "types" ? "по типам квартир с учётом коэффициента семейности (справочно)" : s.populationMethod === "area" ? "по общей площади квартир (справочно)" : `по СПП жилой части / ${fmtRu(s.inputs?.sqmPerPerson ?? 0, 1)} м² на 1 жителя`}).`);
   parts.push(`Требуемая обеспеченность — ${fmtRu(c.requiredPlaces, 0)} мест (ДОУ — ${fmtRu(c.dou, 0)}, школы — ${fmtRu(c.school, 0)}). Существующая — ${fmtRu(c.existing, 0)} мест.`);
   parts.push(
     c.deficitSurplus > 0
@@ -53,7 +53,7 @@ function secSocial(s) {
         ? `Избыток — ${fmtRu(-c.deficitSurplus, 0)} мест: существующая обеспеченность покрывает расчётную потребность.`
         : `Дефицит отсутствует либо сведения о существующей обеспеченности не заполнены.`
   );
-  if (c.areaTotal > 0) parts.push(`Требуемая площадь помещений поликлиники — ${fmtRu(c.areaTotal, 0)} м² (СП 158.13330.2014).`);
+  if (c.areaTotal > 0) parts.push(`Требуемая площадь помещений поликлиники — ${fmtRu(c.areaTotal, 0)} м² (${s.polyclinic?.source || "РНГП/МНГП региона в области здравоохранения"}).`);
   return parts.join(" ");
 }
 
@@ -61,7 +61,7 @@ function secTko(t, stage) {
   if (!t) return "Раздел не заполнен (расчёт ТКО не выполнен).";
   const c = t.calc;
   const parts = [];
-  parts.push(`Объём ТКО рассчитан по нормативу накопления n = ${fmtRu(t.inputs.n, 3)} м³/м²·год, утверждённому в порядке ФЗ № 89-ФЗ (санитарные требования — СанПиН 2.1.3684-21; СП 42.13330.2016, п. 7.1).`);
+  parts.push(`Объём ТКО рассчитан по нормативу накопления n = ${fmtRu(t.inputs.n, 3)} м³/м²·год, утверждённому в порядке ФЗ № 89-ФЗ (санитарные требования — СанПиН 2.1.3684-21; СП 42.13330.2026, приложение Ж).`);
   parts.push(`Расчёт выполнен для стадии ${stage || "—"} по площади квартир ${fmtRu(t.inputs.S, 2)} м².`);
   parts.push(`Годовой объём — ${fmtRu(c.VyearSeason, 1)} м³/год${c.Kseason !== 1 ? ` (с учётом сезонного коэффициента K_сез = ${c.Kseason})` : ""}; среднесуточный — ${fmtRu(c.Vday, 2)} м³/сут.`);
   parts.push(`Масса — ${fmtRu(c.Myear, 2)} т/год (плотность принята по справочным данным ρ = ${c.density} т/м³; уточняется по данным регионального оператора ТКО).`);
@@ -74,7 +74,6 @@ export function buildWordDocument(result, meta) {
   const p = br.parking;
   const objectName = result.inputs?.objectName || "—";
   const regionLabel = p?.region?.label || br.social?.region?.label || "—";
-  const stage = p?.inputs?.designStage || "—";
   const date = meta?.date || todayISO();
   const executor = meta?.executor || "—";
   const gip = meta?.gip || "—";
@@ -131,7 +130,6 @@ export function buildWordDocument(result, meta) {
   <p><strong>Объект:</strong> ${escapeHtml(objectName)}<br>
      <strong>Адрес / регион (РНГП/МНГП):</strong> ${escapeHtml(regionLabel)}<br>
      <strong>Тип объекта:</strong> ${escapeHtml(p?.objectType || "—")}<br>
-     <strong>Стадия:</strong> ${escapeHtml(stage)}<br>
      <strong>Исполнитель:</strong> ${escapeHtml(executor)}<br>
      <strong>Проверено ГИП:</strong> ${escapeHtml(gip)}<br>
      <strong>Дата:</strong> ${escapeHtml(date)}</p>

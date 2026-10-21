@@ -33,7 +33,11 @@ export function fmtRu(n, digits = 3) {
 }
 
 export function todayISO() {
-  return new Date().toISOString().slice(0, 10);
+  // Локальная дата (без UTC-сдвига): toISOString() даёт дату по UTC, что накануне вечером
+  // приводит к ошибке на 1 день.
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 }
 
 export function nowISO() {

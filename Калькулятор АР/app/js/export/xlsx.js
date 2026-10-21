@@ -48,7 +48,7 @@ function buildSheets(result) {
     const rows = [
       [b.document?.fullTitle || "РНГП/МНГП региона"],
       ...(b.region ? [[`Регион (РНГП/МНГП): ${b.region.label}`, b.region.source || ""]] : []),
-      [`Тип объекта: ${b.objectType || "жилой"}`, `Стадия: ${b.inputs?.designStage || "—"}`],
+      [`Тип объекта: ${b.objectType || "жилой"}`],
       [],
       ["Расчётные показатели (N_мм = N_норм × Q × K_корр)", "", "", ""],
       ["Норматив машино-мест", b.calcMeta?.norm || "—"],
@@ -62,17 +62,27 @@ function buildSheets(result) {
         ? ["Группа квартир", "Кол-во квартир, шт.", "Коэффициент", "Машино-места"]
         : ["Функция объекта", "Метод расчёта", "База, мест", "Пункт НД"],
       ...b.permanent.byGroups.map((g) =>
-        isResidential ? [g.label, g.count, g.coefficient, g.spaces] : [g.label, g.coefficient, g.spaces, g.refPoint]
+        isResidential ? [g.label, g.count, g.coefficient, g.spacesRawK] : [g.label, g.coefficient, g.spaces, g.refPoint]
       ),
       ...(isResidential
-        ? [["Итого постоянных ММ", b.permanent.sumF, "", b.permanent.Nn]]
+        ? [
+            ...(b.permanent.invalidPlaces > 0
+              ? [["В том числе места постоянного размещения для инвалидов", "", "1 место / квартиру", b.permanent.invalidPlaces]]
+              : []),
+            ["Итого постоянных ММ (округление итога вверх)", b.permanent.sumF, "", b.permanent.Nn]
+          ]
         : [
             ...(b.objectCalc?.coefficients || []).map((c) => [c.name, `× ${c.k}`, c.after, c.ref]),
             ["Итого постоянных ММ (после коэффициентов, ceil)", "", b.permanent.Nn, "РНГП/МНГП региона"]
           ]),
       [isResidential
-        ? (b.permanent.k && b.permanent.k !== 1 ? `Понижающий коэффициент применён: ${b.reduction?.label || ""} (k = ${b.permanent.k}). N = ⌈N_расч × k⌉.` : "Справочно: понижающий коэффициент по РНГП/МНГП региона не применён (k = 1).")
+        ? (b.permanent.k && b.permanent.k !== 1
+            ? `Допустимое отклонение применено: ${b.deviation?.label || ""} (k = ${b.permanent.k}). N = ⌈N_расч × k⌉ (п. 6.2.4.1; отклонение более 10 % — решение ГЗК Москвы, п. 6.2.4.2).`
+            : "Справочно: отклонение от расчётного числа мест не применяется (k = 1,0) — п. 6.2.4.1 ПП № 945-ПП.")
         : "Коэффициенты объекта (ОТ / МФН / совместное использование) — в таблице выше."],
+      ...(isResidential && b.permanent.method
+        ? [[`Метод расчёта: ${b.permanent.methodLabel || b.permanent.method}`, `Формула: ${b.permanent.formula || ""}`]]
+        : []),
       []
     ];
 
@@ -83,14 +93,19 @@ function buildSheets(result) {
       if (of.region) {
         rows.push([`Регион (нормативная база): ${of.region.label}`, of.region.source || ""]);
       }
-      rows.push(["Формула: N = S / 100 × K × f (коэффициенты K — справочные, из нормативной базы региона)"]);
-      rows.push(["Сценарий", "Режим", "f", "N_баз после f", "Мест"]);
-      rows.push(...of.results.map((r) => [r.label, r.mode === "bkt" ? "БКТ" : "Функционал", r.f, r.afterF, r.places]));
+      rows.push(["Формула: Nв = X / X2 × К1 × К2 (приложение 6 ПП № 945-ПП; X2 — приложение 1)"]);
+      rows.push([`Основание расчёта: ${of.basis || ""}`]);
+      if (of.k1Note) rows.push([of.k1Note]);
+      if (of.k2Note) rows.push([of.k2Note]);
+      rows.push(["Сценарий", "Режим", "База Σ", "После К1 и К2", "Отклонение", "Мест"]);
+      rows.push(...of.results.map((r) => [
+        r.label, r.mode === "bkt" ? "БКТ" : "Функционал", r.sumRaw, r.withK, of.deviation?.label || "не применяется", r.places
+      ]));
       rows.push([`Принят максимум: ${maxSc.label} [${maxSc.mode === "bkt" ? "БКТ" : "Функционал"}]`]);
-      rows.push(["Функция / показатель", "Площадь S_i, м²", "K_i, мест/100 м²", "Машино-мест"]);
-      rows.push(...maxSc.functions.map((f) => [f.label, f.S, f.K, f.raw]));
-      rows.push(["Итого Σ (S/100 × K)", "", "", maxSc.sumRaw]);
-      rows.push([`С учётом f = ${maxSc.f} → мест`, "", "", maxSc.places]);
+      rows.push(["Функция / показатель", "Площадь S_i, м²", "Расчётная база", "X2, м²/место", "Машино-мест"]);
+      rows.push(...maxSc.functions.map((f) => [f.label, f.S, f.basis, f.x2 ?? "—", f.raw]));
+      rows.push(["Итого Σ (база)", "", "", "", maxSc.sumRaw]);
+      rows.push([`С учётом К1 = ${of.k1} и К2 = ${of.k2} → мест`, "", "", "", maxSc.places]);
       rows.push([]);
     }
 
@@ -119,6 +134,8 @@ function buildSheets(result) {
     if (b.mgn) {
       rows.push(["Квота мест для МГН (10 %)", b.mgn.quota, "Включительно или по ТЗ", "181-ФЗ, ст. 15"]);
       rows.push(["Специализированные места для МГН (6,0 × 3,6 м)", b.mgn.special, "Справочно, по шкале СП 59.13330.2020; в итог не входят", "СП 59.13330.2020, п. 5.2.1"]);
+      rows.push(["Специализированные места из гостевой парковки", b.mgn.specOfGuest, "10 % от числа гостевых мест (справочно)", "СП 59.13330.2020, п. 5.2.1"]);
+      rows.push(["Специализированные места из приобъектной парковки", b.mgn.specOfObject, "10 % от числа приобъектных мест (справочно)", "СП 59.13330.2020, п. 5.2.1"]);
     }
     rows.push([]);
     rows.push(["Справочно, габариты машино-места:"]);
@@ -129,7 +146,13 @@ function buildSheets(result) {
     rows.push(["1.6. Итоговая потребность, шт.", b.total]);
     rows.push(["Формула", b.totalFormula]);
     rows.push([]);
-    rows.push(["1.7. Нормативное обоснование"]);
+    if ((b.items || []).length) {
+      rows.push(["1.7. Итоговые показатели"]);
+      rows.push(["Показатель", "Ед. изм.", "Значение", "Пункт НД"]);
+      rows.push(...b.items.map((i) => [i.name, i.unit, i.value, i.refPoint || ""]));
+      rows.push([]);
+    }
+    rows.push(["1.8. Нормативное обоснование"]);
     if (b.justification) {
       b.justification.split("\n\n").forEach((p) => rows.push([p]));
       rows.push([]);
@@ -182,13 +205,15 @@ function buildSheets(result) {
 
   if (br.social) {
     const b = br.social;
+    const d = b.calc.deficitSurplus;
+    const dTxt = d > 0 ? `−${d} (дефицит)` : d < 0 ? `+${Math.abs(d)} (избыток)` : "0 (нет дефицита)";
     sheets["Соцобеспечение"] = sheetFromRows([
       [b.document?.fullTitle || ""],
       [],
       ["Показатель", "Ед. изм.", "Значение", "Пункт НД"],
       ...b.items.map((i) => [i.name, i.unit, i.value, i.refPoint]),
       [],
-      [`Дефицит / избыток: ${b.calc.deficitSurplus} мест (существующие: ${b.calc.existing})`],
+      [`Дефицит / избыток: ${dTxt} (существующие: ${b.calc.existing})`],
       ["Вывод по обеспеченности"],
       [b.conclusion || ""],
       [],

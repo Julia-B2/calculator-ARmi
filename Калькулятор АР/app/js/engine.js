@@ -9,6 +9,7 @@ export function createResult(inputs = {}) {
     inputs,
     blockResults: {
       parking: null,
+      elevators: null,
       tko: null,
       social: null
     }
