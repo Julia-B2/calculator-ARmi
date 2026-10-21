@@ -1,0 +1,155 @@
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 14px;
+  color: #1a1a1a;
+  background: #f5f6f8;
+}
+
+header.top {
+  background: #14324f;
+  color: #fff;
+  padding: 14px 20px;
+}
+header.top h1 { font-size: 18px; margin: 0; }
+header.top .sub { font-size: 12px; opacity: 0.8; margin-top: 4px; }
+
+main { max-width: 1100px; margin: 0 auto; padding: 16px; }
+
+.tabs { display: flex; gap: 4px; border-bottom: 2px solid #14324f; margin-bottom: 16px; flex-wrap: wrap; }
+.tab {
+  padding: 8px 16px; cursor: pointer; background: #e3e7ec;
+  border: 1px solid #c4ccd6; border-bottom: none; border-radius: 6px 6px 0 0;
+  font-size: 13px;
+}
+.tab.active { background: #fff; font-weight: 600; border-color: #14324f; }
+
+.tab-panel { display: none; background: #fff; border: 1px solid #d7dde5; border-radius: 6px; padding: 16px; }
+.tab-panel.active { display: block; }
+
+h2 { font-size: 16px; margin: 0 0 12px; }
+h3 { font-size: 14px; margin: 18px 0 8px; }
+
+fieldset { border: 1px solid #d7dde5; border-radius: 6px; padding: 12px; margin: 0 0 14px; }
+legend { font-weight: 600; font-size: 13px; padding: 0 6px; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+label.field { display: flex; flex-direction: column; font-size: 12px; color: #444; gap: 4px; }
+label.field input, label.field select {
+  padding: 6px 8px; border: 1px solid #c4ccd6; border-radius: 4px; font-size: 13px;
+}
+
+table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 13px; }
+th, td { border: 1px solid #d7dde5; padding: 6px 8px; text-align: left; vertical-align: top; }
+th { background: #eef1f5; font-weight: 600; }
+td.num, th.num { text-align: right; }
+td.center, th.center { text-align: center; }
+tr.total td { font-weight: 600; background: #f7f9fb; }
+
+.toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0; }
+button {
+  padding: 8px 14px; border: none; border-radius: 5px; cursor: pointer;
+  font-size: 13px; background: #14324f; color: #fff;
+}
+button.secondary { background: #5a6b7d; }
+button.accent { background: #1f7a45; }
+button:hover { opacity: 0.9; }
+
+.warn { background: #fff4e5; border: 1px solid #e0a800; color: #7a5200; padding: 8px 10px; border-radius: 5px; font-size: 12px; margin: 8px 0; }
+
+.result-total { font-size: 18px; font-weight: 700; color: #14324f; }
+.result-total-lg { font-size: 26px; font-weight: 800; text-align: right; }
+.result-total-lg span { font-size: 30px; font-weight: 800; }
+.block-total { text-align: right; font-weight: 700; color: #14324f; font-size: 14px; margin: 6px 0 2px; }
+/* Исходные данные — всё в одну строку; «всего квартир» выделяется жирным */
+.grid.input-row { grid-template-columns: 1.6fr repeat(3, 1fr) 1.1fr; align-items: end; }
+.grid.input-row label.total-field,
+.grid.input-row label.total-field input { font-weight: 700; color: #14324f; }
+.grid.input-row label.total-field input { background: #eef1f5; border: 1px solid #ccd4de; }
+/* Вкладка «Исходные данные»: общие параметры — 3 поля, квартирография — 4 поля */
+#panel-input .grid.input-row { grid-template-columns: 2fr 2fr 1.4fr; }
+#grpHousing .grid.input-row { grid-template-columns: 1.3fr 1.3fr 1.3fr 1.1fr; }
+/* Чекбоксы коэффициентов */
+label.check { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #444; }
+label.check input { width: auto; }
+/* Текстовое обоснование для экспертизы */
+h4 { margin: 12px 0 6px; font-size: 13px; color: #14324f; }
+.justification { background: #f7f9fb; border: 1px solid #e1e6ec; border-radius: 5px; padding: 10px 12px; font-size: 12.5px; line-height: 1.55; color: #222; white-space: pre-wrap; }
+.formula { font-family: Consolas, monospace; font-size: 12px; color: #333; background: #f2f4f7; padding: 6px 8px; border-radius: 4px; display: inline-block; }
+
+.notes ul { margin: 6px 0; padding-left: 18px; }
+.notes li { margin-bottom: 6px; }
+
+.muted { color: #667; font-size: 12px; }
+
+.manual-input {
+  width: 90px; padding: 4px 6px; border: 1px solid #c4ccd6; border-radius: 4px;
+  font-size: 13px; text-align: right;
+}
+td input[type="number"] { max-width: 100%; }
+
+/* Поле, считающееся автоматически (только чтение) */
+input[readonly] {
+  background: #f0f2f5; color: #445; border-color: #d5dbe3; cursor: default;
+}
+
+/* Справочные (неизменяемые) коэффициенты */
+td.ref-value { color: #445; background: #fafbfc; font-variant-numeric: tabular-nums; }
+
+/* Сценарии приобъектных ММ */
+.scenario-title {
+  font-weight: 700;
+  font-size: 13.5px;
+  margin: 10px 0 4px;
+}
+.scenario-title .mode-select { font-weight: 400; }
+fieldset.scenario {
+  margin-bottom: 12px; border: none; padding: 0;
+}
+
+/* Валидации вкладки «Исходные данные» */
+.validations { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+.validations .warn, .validations .err {
+  display: block; padding: 5px 9px; border-radius: 4px; font-size: 12px; line-height: 1.45;
+}
+.validations .warn { color: #7a5200; background: #fff8e8; border: 1px solid #eed9a8; }
+.validations .err { color: #8f1d1d; background: #fdecec; border: 1px solid #f0c2c2; }
+
+/* Расчётные показатели блока «Машиноместа» (норматив / единица / K_корр / расчёт / принято) */
+#permCalcMeta { grid-template-columns: 2fr 1.1fr 0.9fr 1.1fr 1.1fr; align-items: end; }
+#permCalcMeta input[readonly] { font-weight: 600; color: #14324f; }
+
+/* Фракции ТКО — ввод долей */
+#tkoFractionsInput { grid-template-columns: repeat(3, 1fr); }
+
+/* Вывод по соцобеспечению */
+#socialConclusion { width: 100%; min-height: 84px; font-size: 12.5px; line-height: 1.5; }
+
+/* Проверка актуальности нормативной базы */
+.check-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+.btn-danger { background: #b3261e; }
+.btn-danger:hover { background: #93190f; }
+.btn-danger:disabled { background: #b8a5a3; cursor: progress; }
+.btn-danger .spinner {
+  display: inline-block; width: 12px; height: 12px; margin-right: 8px;
+  border: 2px solid rgba(255, 255, 255, .45); border-top-color: #fff;
+  border-radius: 50%; vertical-align: -2px; animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.status-pill {
+  padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600;
+  border: 1px solid transparent;
+}
+.status-pill.ok { background: #e7f5ec; color: #1f7a45; border-color: #a9dcc0; }
+.status-pill.bad { background: #fdecec; color: #b3261e; border-color: #f0c2c2; }
+.status-pill.muted-pill { background: #eef1f5; color: #667; border-color: #ccd4de; }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 4px; }
+#normChanges ul { margin: 6px 0; padding-left: 18px; }
+#normChanges li { margin-bottom: 6px; }
+#normJournal { font-size: 12.5px; }
+#normJournal .st-ok { color: #1f7a45; font-weight: 600; }
+#normJournal .st-bad { color: #b3261e; font-weight: 600; }
+
+

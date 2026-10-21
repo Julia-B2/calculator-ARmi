@@ -1,0 +1,8 @@
+@media print {
+  body { background: #fff; }
+  header.top { background: #fff; color: #000; border-bottom: 2px solid #000; }
+  .tabs, .toolbar, .warn { display: none !important; }
+  .tab-panel { display: block !important; border: none; padding: 0; page-break-inside: avoid; }
+  table { font-size: 11px; }
+  h2 { page-break-after: avoid; }
+}

@@ -1,0 +1,2564 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Калькулятор проектных показателей АР</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/print.css" media="print">
+</head>
+<body>
+
+<header class="top">
+  <h1>Калькулятор проектных показателей АР</h1>
+  <div class="sub">Машиноместа · Лифты · Социальное обеспечение · ТКО</div>
+</header>
+
+<main>
+  <div class="tabs">
+    <div class="tab active" data-tab="input">Исходные данные</div>
+    <div class="tab" data-tab="parking">Машиноместа</div>
+    <div class="tab" data-tab="elevators">Лифты</div>
+    <div class="tab" data-tab="social">Социальное обеспечение</div>
+    <div class="tab" data-tab="tko">ТКО</div>
+    <div class="tab" data-tab="summary">Итог</div>
+  </div>
+
+  <!-- ================= ИСХОДНЫЕ ДАННЫЕ (новая вкладка) ================= -->
+  <section class="tab-panel active" id="panel-input">
+    <h2>Исходные данные</h2>
+
+    <fieldset>
+      <legend>Общие параметры</legend>
+      <div class="grid input-row">
+        <label class="field">Наименование объекта
+          <input type="text" id="objectName" value="Молодогвардейская">
+        </label>
+        <label class="field">Адрес / Регион (РНГП/МНГП)
+          <select id="regionSelect"></select>
+        </label>
+        <label class="field">Тип объекта
+          <select id="objectTypeSelect"></select>
+        </label>
+        <label class="field">Стадия проектирования
+          <select id="designStageSelect">
+            <option value="ПП">ПП — проектная документация</option>
+            <option value="ПД">ПД — рабочая документация</option>
+          </select>
+        </label>
+      </div>
+      <div class="muted" id="regionNote"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Функции объекта</legend>
+      <div class="toolbar" id="functionToggles">
+        <label class="check"><input type="checkbox" data-function="residential" checked> Жильё</label>
+        <label class="check"><input type="checkbox" data-function="trade"> Торговля</label>
+        <label class="check"><input type="checkbox" data-function="school"> Школа</label>
+        <label class="check"><input type="checkbox" data-function="medical"> Поликлиника</label>
+        <label class="check"><input type="checkbox" data-function="office"> Офис</label>
+      </div>
+      <p class="muted">Отметьте функции, входящие в объект: показываются только их площади. В объектном расчёте (ТЦ, офис, школа, поликлиника, МФН) площади выбранных функций учитываются автоматически. Для встроенной коммерции в жилом доме используйте блок «Приобъектные (коммерция)».</p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Площади, вместимость и население</legend>
+      <div class="grid">
+        <label class="field">Общая площадь (м²)
+          <input type="number" id="totalArea" value="0" min="0" max="500000" step="0.01" title="ТЭПы / экспликация. Не более 500 000 м²">
+        </label>
+        <label class="field">Жилая площадь (м²)
+          <input type="number" id="areaResidential" value="0" min="0" step="0.01" data-purpose="residential">
+        </label>
+        <label class="field">Торговая площадь (м²)
+          <input type="number" id="areaTrade" value="0" min="0" step="0.01" data-purpose="trade">
+        </label>
+        <label class="field">Учебная площадь (м²)
+          <input type="number" id="areaSchool" value="0" min="0" step="0.01" data-purpose="school">
+        </label>
+        <label class="field">Медицинская площадь (м²)
+          <input type="number" id="areaMedical" value="0" min="0" step="0.01" data-purpose="medical">
+        </label>
+        <label class="field">Офисная площадь (м²)
+          <input type="number" id="areaOffice" value="0" min="0" step="0.01" data-purpose="office">
+        </label>
+        <label class="field" data-for="школа,поликлиника">Вместимость / количество мест (ед.)
+          <input type="number" id="capacity" value="0" min="1" step="1" title="Задание на проектирование">
+        </label>
+        <label class="field" data-for="школа,поликлиника">Коэффициент загрузки (0,5–1,2)
+          <input type="number" id="occupancy" value="1" min="0.5" max="1.2" step="0.05" title="Доля или %; типовые значения — по заданию">
+        </label>
+        <label class="field" data-for="жилой,офисный,многофункциональный">Жители / сотрудники / посетители (чел.)
+          <input type="number" id="population" value="0" min="0" step="1" title="Принято по заданию/СП">
+        </label>
+      </div>
+      <div id="inputValidations" class="validations"></div>
+      <p class="muted">Проверки: Σ площадей по назначению ≤ общей площади; плотность населения — МКД 20–60 м²/чел., офисы 6–15 м²/раб.место. В расчёт машино-мест подставляются площади выбранных функций (торговая → GLA, учебная → школа, медицинская → поликлиника, офисная → офис).</p>
+    </fieldset>
+
+    <fieldset id="grpHousing">
+      <legend>Жилая часть — квартирография</legend>
+      <div class="grid input-row">
+        <label class="field">Квартиры до 70 м² — F1 (шт.)
+          <input type="number" id="f1" value="325" min="0" step="1">
+        </label>
+        <label class="field">Квартиры 70–100 м² — F2 (шт.)
+          <input type="number" id="f2" value="176" min="0" step="1">
+        </label>
+        <label class="field">Квартиры свыше 100 м² — F3 (шт.)
+          <input type="number" id="f3" value="113" min="0" step="1">
+        </label>
+        <label class="field total-field">Квартир, всего (шт.)
+          <input type="number" id="apartmentsTotal" value="614" min="0" step="1" readonly title="Считается автоматически: F1 + F2 + F3">
+        </label>
+      </div>
+      <p class="muted">Для жилого объекта применяется метод квартирографии Nп = F1×0,8 + F2×1,2 + F3×1,6 (945-ПП, Прил. 5) — региональный аналог по классу жилья. Для ТЦ/офиса/МФН заполните параметры ниже.</p>
+    </fieldset>
+
+    <fieldset id="grpObj">
+      <legend>Параметры объекта (класс жилья / ТЦ / офис)</legend>
+      <div class="grid">
+        <label class="field" data-obj="mfn">Класс жилья (для МФН-жилой части)
+          <select id="housingClassSelect"></select>
+        </label>
+        <label class="field" data-obj="mfn">Квартир (для расчёта по классу), шт.
+          <input type="number" id="objUnits" value="0" min="0" step="1">
+        </label>
+        <label class="field" data-obj="mall">Тип ТЦ
+          <select id="mallTypeSelect"></select>
+        </label>
+        <label class="field" data-obj="office">Офис — численность (чел.)
+          <input type="number" id="objEmployees" value="0" min="0" step="1">
+        </label>
+      </div>
+      <p class="muted">Площади берутся из блока «Площади, вместимость и население». Заполняется для типов «ТЦ», «Офис», «МФН». Коэффициенты K подставляются из норм выбранного региона/уровня (СП 42, прил. Ж).</p>
+    </fieldset>
+
+    <fieldset id="grpCoef" data-obj="coef">
+      <legend>Корректирующие коэффициенты</legend>
+      <div class="toolbar">
+        <label class="check"><input type="checkbox" id="coefOt"> Близость к ОТ (метро/МЦД) — снижение до 25 %</label>
+        <label class="check"><input type="checkbox" id="coefMfn"> Многофункциональность — буфер +10 %</label>
+        <label class="field">Совместное использование (0,8–0,9)
+          <select id="coefShared">
+            <option value="0">Нет</option>
+            <option value="0.8">0,80</option>
+            <option value="0.85">0,85</option>
+            <option value="0.9">0,90</option>
+          </select>
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Особые условия (ГПЗУ/ППТ)</legend>
+      <label class="field">Особые условия (строка из ГПЗУ/ППТ)
+        <input type="text" id="specialConditions" placeholder="напр.: ограничение парковки до 150 мест, экозона">
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Актуальность нормативной базы</legend>
+      <div class="check-row">
+        <button type="button" id="btnCheckNorms" class="btn-danger">
+          <span class="spinner" hidden></span><span class="btn-label">Проверить на актуальность норм</span>
+        </button>
+        <span id="normStatus" class="status-pill muted-pill">Статус не проверен</span>
+      </div>
+      <div id="normChanges" class="notes" hidden></div>
+      <div class="table-wrap">
+        <table id="normJournal">
+          <thead>
+            <tr><th>Дата проверки</th><th>Пользователь</th><th>Акт</th><th>Статус</th><th>Примечание / замена</th></tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="5" class="muted">Журнал пуст — выполните проверку норм.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="btn-row">
+        <button type="button" id="btnJournalCsv" class="secondary">Журнал проверки (CSV)</button>
+      </div>
+      <p class="muted">Статус сохраняется до конца сессии. Журнал проверки прикладывается к обоснованию и указывается в конечном отчёте.</p>
+    </fieldset>
+  </section>
+
+  <!-- ================= МАШИНОМЕСТА ================= -->
+  <section class="tab-panel" id="panel-parking">
+    <h2>Блок 1. Машиноместа</h2>
+
+    <fieldset>
+      <legend>Постоянные машино-места</legend>
+      <div class="toolbar" id="permCoefToolbar">
+        <label class="field">Понижающий К (по РНГП/МНГП региона)
+          <select id="reductionKSelect"></select>
+        </label>
+        <label class="field" id="reductionZoneWrap" style="display:none">Зона доступности рельсового каркаса
+          <select id="reductionZoneSelect"></select>
+        </label>
+      </div>
+      <!-- Расчётные показатели (N_мм = N_норм × Q × K_корр) -->
+      <div class="grid calc-meta" id="permCalcMeta">
+        <label class="field">Норматив машино-мест
+          <input type="text" id="pmNorm" readonly value="—" title="Подтягивается по региону и типу объекта">
+        </label>
+        <label class="field">Расчётная единица
+          <input type="text" id="pmUnit" readonly value="—">
+        </label>
+        <label class="field">Коэффициент корректировки
+          <input type="number" id="pmCorrection" value="1" min="0.1" max="3" step="0.05" title="K_корр, по умолчанию 1,0">
+        </label>
+        <label class="field">Итого машино-мест (расчёт)
+          <input type="text" id="pmCalculated" readonly value="—">
+        </label>
+        <label class="field">Принятое количество (округление вверх)
+          <input type="text" id="pmAdopted" readonly value="—">
+        </label>
+      </div>
+      <table id="parkingPermanent">
+        <thead>
+          <tr><th>Группа квартир</th><th class="num">Кол-во квартир, шт.</th><th class="num">Коэффициент</th><th class="num">Машино-места</th><th>Пункт НД</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="block-total" id="permTotal">Итог м/м: —</div>
+      <p class="muted" id="parkingReductionNote">Справочно: понижающий коэффициент по ПП-945 (п. 6.2.4) не применён (k = 1)</p>
+    </fieldset>
+
+    <fieldset id="grpObjectFacilities">
+      <legend>Приобъектные (коммерция)</legend>
+      <p class="muted">Оба режима считают по общей площади: <strong>N = S / 100 × K × f</strong>. «БКТ» — один общий коэффициент K на весь объект (без разбивки по функциям). «Функционал» — разбивка по функциональным группам, у каждой своя площадь S<sub>i</sub> и коэффициент K<sub>i</sub>. Все коэффициенты — справочные, подставляются автоматически из нормативной базы выбранного региона. При нескольких сценариях в итог берётся максимум.</p>
+      <div id="scenariosContainer"></div>
+      <div class="toolbar">
+        <button type="button" class="secondary" id="btnAddScenario">+ Добавить сценарий</button>
+        <button type="button" class="secondary" id="btnRemoveScenario">− Удалить сценарий</button>
+      </div>
+      <div id="objectFacilitiesResult" class="muted"></div>
+      <div class="block-total" id="objectTotal">Итог м/м: —</div>
+    </fieldset>
+
+    <fieldset id="grpGuest">
+      <legend>Гостевые (жильцы)</legend>
+      <table id="parkingExtra">
+        <thead>
+          <tr><th>Показатель</th><th class="num">Значение</th><th>Примечание</th><th>Пункт НД</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="block-total" id="extraTotal">Итог м/м: —</div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Электромобили</legend>
+      <table id="parkingEv">
+        <thead>
+          <tr><th>Показатель</th><th class="num">Значение</th><th>Примечание</th><th>Пункт НД</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="block-total" id="evTotal">Итог м/м: —</div>
+      <p class="muted" id="evInfraNote">Справочно, инженерная инфраструктура: кабель-каналы или шинопроводы учесть на 100 % машино-мест.</p>
+    </fieldset>
+
+    <fieldset>
+      <legend>МГН</legend>
+      <table id="parkingAdditional">
+        <thead>
+          <tr><th>Показатель</th><th class="num">Значение</th><th>Примечание</th><th>Пункт НД</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="block-total" id="mgnTotal">Итог м/м: —</div>
+      <div class="notes" id="parkingAdditionalNotes">
+        <p class="muted">Справочно, габариты машино-места:</p>
+        <ul>
+          <li>Габариты обычного места: 5,3 × 2,5 м (приложение А к СП 113.13330.2023)</li>
+          <li>Габариты специализированного места: 6,0 × 3,6 м; вдоль проезжей части длина 6,8 м (СП 59.13330.2020, п. 5.2.4; СП 113.13330.2023, п. 5.6)</li>
+        </ul>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Итоговая потребность</legend>
+      <div class="result-total result-total-lg">Всего: <span id="parkingTotal">—</span> машино-мест</div>
+      <div style="margin-top:8px"><span class="formula" id="parkingFormula">—</span></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Сводная таблица всех показателей</legend>
+      <table id="parkingSummary">
+        <thead>
+          <tr><th>Показатель</th><th class="num">Значение</th><th class="num">Единицы</th><th>Обоснование</th><th>Норматив</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </fieldset>
+
+    <fieldset>
+      <legend>Нормативное обоснование</legend>
+      <div class="muted" id="parkingRefsRegion">РНГП/МНГП региона: —</div>
+      <h4>Текстовое обоснование для экспертизы</h4>
+      <div class="justification" id="parkingJustification"></div>
+      <table id="parkingRefs">
+        <thead><tr><th>Пункт</th><th>Требование</th><th>Учёт в расчёте</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </fieldset>
+  </section>
+
+  <!-- ================= ТКО ================= -->
+  <section class="tab-panel" id="panel-tko">
+    <h2>Блок 4. ТКО</h2>
+
+    <fieldset>
+      <legend>Исходные данные</legend>
+      <div class="grid">
+        <label class="field">Площадь квартир (м²)
+          <input type="number" id="tkoSq" value="100137.08" min="0" step="0.01">
+        </label>
+        <label class="field">Норматив накопления n (м³/м²·год)
+          <input type="number" id="tkoN" value="0.1" min="0" step="0.001" readonly title="Норматив из нормативной базы (СанПиН 2.1.3684-21, региональные акты) — только для чтения">
+        </label>
+        <label class="field">Сезонный коэффициент (опц., 1 — нет)
+          <input type="number" id="tkoSeason" value="1" min="0.5" max="3" step="0.05" readonly title="Справочный коэффициент из нормативной базы — только для чтения">
+        </label>
+        <label class="field">Плотность отходов ρ (т/м³)
+          <input type="number" id="tkoDensity" value="0.35" min="0.05" max="2" step="0.01" readonly title="Справочное значение плотности — только для чтения">
+        </label>
+        <label class="field">Период вывоза T (сут)
+          <input type="number" id="tkoT" value="3" min="1" step="1">
+        </label>
+        <label class="field">Объём контейнера (м³)
+          <input type="number" id="tkoVolume" value="1.1" min="0" step="0.01">
+        </label>
+        <label class="field">Длина контейнера (мм)
+          <input type="number" id="tkoLen" value="1377" min="0" step="1">
+        </label>
+        <label class="field">Ширина контейнера (мм)
+          <input type="number" id="tkoWid" value="1077" min="0" step="1">
+        </label>
+        <label class="field">Коэфф. неравномерности Kн
+          <input type="number" id="tkoKn" value="1.25" min="0" step="0.01" readonly title="Нормативный коэффициент — только для чтения">
+        </label>
+        <label class="field">Коэфф. заполнения Kз
+          <input type="number" id="tkoKz" value="0.75" min="0" step="0.01" readonly title="Нормативный коэффициент — только для чтения">
+        </label>
+        <label class="field">Кол-во контейнерных помещений (шт.)
+          <input type="number" id="tkoPrem" value="3" min="1" step="1">
+        </label>
+        <label class="field">Зазор между контейнерами (м)
+          <input type="number" id="tkoGap" value="0.35" min="0" step="0.01">
+        </label>
+        <label class="field">Коэфф. проходов Kпр
+          <input type="number" id="tkoKpr" value="1.2" min="0" step="0.01" readonly title="Нормативный коэффициент — только для чтения">
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Результаты расчёта</legend>
+      <table id="tkoResults">
+        <thead><tr><th>Показатель</th><th>Ед. изм.</th><th class="num">Значение</th><th>Пункт НД</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </fieldset>
+
+    <fieldset>
+      <legend>Разбивка по фракциям (справочно)</legend>
+      <div class="grid" id="tkoFractionsInput"></div>
+      <table id="tkoFractions">
+        <thead><tr><th>Фракция</th><th class="num">Доля, %</th><th class="num">Объём, м³/год</th><th class="num">Масса, т/год</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="muted" id="tkoFractionsNote"></p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Нормативные ссылки</legend>
+      <table id="tkoRefs">
+        <thead><tr><th>Пункт</th><th>Требование</th><th>Учёт в расчёте</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </fieldset>
+  </section>
+
+  <!-- ================= ЛИФТЫ ================= -->
+  <section class="tab-panel" id="panel-elevators">
+    <h2>Блок 2. Лифты</h2>
+
+    <fieldset>
+      <legend>Исходные данные</legend>
+      <div class="grid">
+        <label class="field">Этажность (эт.)
+          <input type="number" id="elFloors" value="10" min="1" max="100" step="1">
+        </label>
+        <label class="field">Назначение
+          <select id="elPurpose">
+            <option value="residential">Жилой (МКД)</option>
+            <option value="public">Общественный (школа / поликлиника / офис / ТЦ)</option>
+          </select>
+        </label>
+        <label class="field">Пассажиропоток в час пик (чел/ч)
+          <input type="number" id="elFlow" value="0" min="0" step="10" title="0 — оценочно по вместимости × коэффициент загрузки (справочно)">
+        </label>
+        <label class="field">Грузоподъёмность (кг)
+          <input type="number" id="elLoad" value="400" min="100" max="5000" step="50" readonly title="Рекомендуемое значение по СП/ГОСТ — подставляется автоматически, только для чтения">
+        </label>
+        <label class="field">Скорость (м/с)
+          <input type="number" id="elSpeed" value="1" min="0.5" max="10" step="0.1" readonly title="Типовое значение по этажности — подставляется автоматически, только для чтения">
+        </label>
+        <label class="field">Принятое количество лифтов (шт.)
+          <input type="number" id="elAdopted" value="0" min="0" max="50" step="1" readonly title="Расчётное значение: не менее минимального по СП, округление вверх — только для чтения">
+        </label>
+      </div>
+      <div id="elValidation" class="validations"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Результаты расчёта</legend>
+      <table id="elResults">
+        <thead><tr><th>Показатель</th><th>Ед. изм.</th><th class="num">Значение</th><th>Пункт НД</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="block-total" id="elTotal">Итог: —</div>
+      <p class="muted" id="elNote"></p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Нормативные ссылки</legend>
+      <table id="elRefs">
+        <thead><tr><th>Пункт</th><th>Требование</th><th>Учёт в расчёте</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </fieldset>
+  </section>
+
+  <!-- ================= СОЦОБЕСПЕЧЕНИЕ ================= -->
+  <section class="tab-panel" id="panel-social">
+    <h2>Блок 3. Социальное обеспечение</h2>
+
+    <fieldset>
+      <legend>Метод расчёта населения и зона</legend>
+      <div class="grid">
+        <label class="field">Метод расчёта населения
+          <select id="socialMethod">
+            <option value="area">По площади квартир (Sкв / площадь на человека)</option>
+            <option value="types">По типам квартир (кол-во × коэффициент семейности)</option>
+          </select>
+        </label>
+        <label class="field">Зона города (РНГП/МНГП региона)
+          <select id="socialZone"></select>
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset class="method-area">
+      <legend>Исходные данные (метод по площади)</legend>
+      <div class="grid">
+        <label class="field">Общая площадь квартир (м²)
+          <input type="number" id="socialSq" value="48181.3" min="0" step="0.01">
+        </label>
+        <label class="field">Площадь на 1 человека (м²/чел.)
+          <input type="number" id="socialSqm" value="33" min="1" step="0.1" readonly title="Норматив по ПП № 2152-ПП / РНГП региона — подставляется автоматически, только для чтения">
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset class="method-types" style="display:none">
+      <legend>Квартирография и коэффициенты семейности (метод по типам квартир)</legend>
+      <table id="socialAptInput">
+        <thead>
+          <tr><th>Тип квартиры</th><th class="num">Кол-во, шт.</th><th class="num">Коэф. семейности (чел./кв.)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Студия</td><td><input type="number" data-apt="studio" value="23" min="0" step="1"></td><td><input type="number" data-fam="studio" value="1" min="0" step="0.1"></td></tr>
+          <tr><td>1-комнатная</td><td><input type="number" data-apt="k1" value="119" min="0" step="1"></td><td><input type="number" data-fam="k1" value="1.5" min="0" step="0.1"></td></tr>
+          <tr><td>2-комнатная / 2Е</td><td><input type="number" data-apt="k2" value="179" min="0" step="1"></td><td><input type="number" data-fam="k2" value="2.5" min="0" step="0.1"></td></tr>
+          <tr><td>3-комнатная / 3Е</td><td><input type="number" data-apt="k3" value="147" min="0" step="1"></td><td><input type="number" data-fam="k3" value="3.2" min="0" step="0.1"></td></tr>
+          <tr><td>4-комнатная / 4Е</td><td><input type="number" data-apt="k4" value="146" min="0" step="1"></td><td><input type="number" data-fam="k4" value="4" min="0" step="0.1"></td></tr>
+        </tbody>
+      </table>
+      <div class="muted">Коэффициенты семейности задаются вручную — в ПП № 2152-ПП приведена площадь квартир на человека (33 м²/чел.), а не коэффициенты по типам квартир. Уточните значения под проект.</div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Квартирография — расчёт населения по типам</legend>
+      <table id="socialAptCalc">
+        <thead>
+          <tr><th>Тип квартиры</th><th class="num">Кол-во, шт.</th><th class="num">Коэф. семейности</th><th class="num">Население, чел.</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </fieldset>
+
+    <fieldset>
+      <legend>Поликлиники — удельные показатели</legend>
+      <div class="grid">
+        <label class="field">Поликлиника детская (пос./см. на 1000)
+          <input type="number" id="socialPcChild" value="5.8" min="0" step="0.1" readonly title="Норматив СП 158.13330.2014 / РНГП — только для чтения">
+        </label>
+        <label class="field">Поликлиника взрослая (пос./см. на 1000)
+          <input type="number" id="socialPcAdult" value="13.2" min="0" step="0.1" readonly title="Норматив СП 158.13330.2014 / РНГП — только для чтения">
+        </label>
+        <label class="field">Поликлиника смешанная (пос./см. на 1000)
+          <input type="number" id="socialPcMixed" value="19" min="0" step="0.1" readonly title="Норматив СП 158.13330.2014 / РНГП — только для чтения">
+        </label>
+        <label class="field">Удельная площадь на посещение (м²)
+          <input type="number" id="socialArea" value="27" min="0" step="0.1" readonly title="Норматив СП 158.13330.2014 — только для чтения">
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Результаты расчёта</legend>
+      <table id="socialResults">
+        <thead><tr><th>Показатель</th><th>Ед. изм.</th><th class="num">Значение</th><th>Пункт НД</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </fieldset>
+
+    <fieldset>
+      <legend>Обеспеченность и вывод</legend>
+      <div class="grid">
+        <label class="field">Существующая обеспеченность (мест, ДОУ + школы)
+          <input type="number" id="socialExisting" value="0" min="0" step="1" title="Существующие места социальной инфраструктуры на участке/в зоне">
+        </label>
+        <label class="field">Дефицит / избыток (мест)
+          <input type="text" id="socialDeficit" readonly value="—">
+        </label>
+      </div>
+      <label class="field" style="display:block">Вывод по обеспеченности
+        <textarea id="socialConclusion" rows="4" placeholder="Заполняется автоматически после расчёта — можно отредактировать вручную"></textarea>
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Примечания и рекомендации</legend>
+      <div class="notes" id="socialNotes"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Нормативные ссылки</legend>
+      <table id="socialRefs">
+        <thead><tr><th>Пункт</th><th>Требование</th><th>Учёт в расчёте</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </fieldset>
+  </section>
+
+  <!-- ================= ИТОГ ================= -->
+  <section class="tab-panel" id="panel-summary">
+    <h2>Сводка по проекту</h2>
+    <table id="summaryTable">
+      <thead><tr><th>Показатель</th><th class="num">Значение</th><th>Единицы</th><th>Обоснование</th><th>Норматив</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <p class="muted">Сводка формируется автоматически после расчёта блоков.</p>
+
+    <fieldset>
+      <legend>Реквизиты расчёта и выгрузка</legend>
+      <div class="grid">
+        <label class="field">Дата расчёта
+          <input type="text" id="calcDate" readonly>
+        </label>
+        <label class="field">Исполнитель (ФИО, должность)
+          <input type="text" id="execName" placeholder="напр.: Иванов И.И., инженер-проектировщик">
+        </label>
+        <label class="field">Проверено ГИП (ФИО)
+          <input type="text" id="gipName" placeholder="напр.: Петров П.П., ГИП">
+        </label>
+      </div>
+      <div class="btn-row">
+        <button type="button" id="btnExportCsv" class="accent">Экспорт в Excel (CSV)</button>
+        <button type="button" id="btnExportWord">Экспорт в Word</button>
+      </div>
+      <p class="muted">CSV содержит колонки: Показатель, Значение, Единицы, Обоснование, Норматив, Дата расчёта, Исполнитель, ГИП. Word — готовый раздел пояснительной записки с допущениями и журналом проверки норм. Подробные выгрузки HTML/XLSX — кнопки внизу окна.</p>
+    </fieldset>
+  </section>
+
+  <div class="toolbar">
+    <button id="btnCalc">Рассчитать всё</button>
+    <button id="btnDoc" class="accent">Сохранить итоговый документ (HTML)</button>
+    <button id="btnXlsx" class="secondary">Экспорт в XLSX</button>
+  </div>
+</main>
+
+<!-- Встроенная нормативная база: работает оффлайн при открытии файла двойным кликом.
+     Полная версия — в data/norms.json (используется при работе через локальный сервер). -->
+<script id="norms-embed" type="application/json">
+{
+  "meta": {
+    "version": "0.4.0",
+    "updated": "2026-10-21",
+    "title": "Нормативная база калькулятора проектных показателей АР",
+    "note": "Единый источник нормативов. Полный перечень регионов РФ (85 субъектов) по уровням (tier: high/medium/base) + подробные значения для ключевых регионов. Объектно-ориентированный расчёт (жильё по классу / ТЦ / офис / МФН) и коэффициенты — в разделах parking.objectTypes/housingClasses/mallTypes/objectCoefficients."
+  },
+  "regions": [
+    {
+      "tier": "base",
+      "id": "sp42_federal",
+      "label": "Федеральная база",
+      "source": "СП 42.13330.2016 (ред. изм. № 3 от 09.06.2022), приложение Ж, таблица Ж.1; ст. 29.2 ГрК РФ",
+      "note": "Базовая федеральная норма обеспеченности стоянками (мест на 100 м²). Регионы обязаны устанавливать в РНГП/МНГП показатели не ниже федерального минимума (Приказ Минстроя РФ № 250/пр от 23.04.2025); конкретные K_i уточняйте по РНГП субъекта.",
+      "parking": {
+        "bktK": 1.5,
+        "coefficients": {
+          "retail_food": 2.5,
+          "retail_nonfood": 1.4,
+          "mall": 1.4,
+          "office": 1.5,
+          "catering": 2,
+          "services": 1.4,
+          "hotel": 1,
+          "medical": 1.5,
+          "education": 1,
+          "sport": 2,
+          "culture": 1.2
+        },
+        "reductionKZones": [
+          {
+            "id": "near",
+            "label": "В пешей доступности до остановки общественного транспорта (до 500 м)",
+            "k": 0.9
+          },
+          {
+            "id": "far",
+            "label": "Вне зоны доступности общественного транспорта (свыше 500 м)",
+            "k": 1
+          }
+        ]
+      },
+      "social": {
+        "zones": [
+          {
+            "id": "zone1",
+            "label": "Зона 1 (город)",
+            "douPer1000": 44,
+            "schoolPer1000": 90
+          },
+          {
+            "id": "zone2",
+            "label": "Зона 2 (сельская/малая)",
+            "douPer1000": 63,
+            "schoolPer1000": 124
+          }
+        ],
+        "defaultZone": "zone1",
+        "sqmPerPerson": 33
+      }
+    },
+    {
+      "id": "moscow",
+      "label": "Москва",
+      "source": "ПП Москвы № 945-ПП (ред. 2026), приложение 5; МНГП г. Москвы; ПП Москвы № 2151-ПП (в ред. № 921-ПП от 28.04.2025); ПП Москвы № 2152-ПП",
+      "note": "Приобъектные ММ по функциям: коэффициенты МНГП Москвы на 100 м² общей площади. Соцобеспечение — ПП Москвы. Уточните по действующей редакции МНГП.",
+      "parking": {
+        "bktK": 2,
+        "coefficients": {
+          "retail_food": 4,
+          "retail_nonfood": 1.6,
+          "mall": 1.6,
+          "office": 2,
+          "catering": 2.5,
+          "services": 1.6,
+          "hotel": 1,
+          "medical": 2,
+          "education": 1,
+          "sport": 2.5,
+          "culture": 1.5
+        },
+        "reductionKZones": [
+          {
+            "id": "walk",
+            "label": "В пешей доступности до рельсового каркаса (метро / МЦК / МЦД), до 500 м",
+            "k": 0.75
+          },
+          {
+            "id": "near",
+            "label": "В зоне транспортной доступности, 500–1200 м",
+            "k": 0.85
+          },
+          {
+            "id": "far",
+            "label": "Вне зоны доступности рельсового каркаса, свыше 1200 м",
+            "k": 1
+          }
+        ]
+      },
+      "social": {
+        "zones": [
+          {
+            "id": "zone1",
+            "label": "Зона 1",
+            "douPer1000": 44,
+            "schoolPer1000": 90
+          },
+          {
+            "id": "zone2",
+            "label": "Зона 2",
+            "douPer1000": 63,
+            "schoolPer1000": 124
+          }
+        ],
+        "defaultZone": "zone1",
+        "sqmPerPerson": 33
+      },
+      "tier": "high"
+    },
+    {
+      "id": "spb",
+      "label": "Санкт-Петербург",
+      "source": "РНГП Санкт-Петербурга (Закон СПб о РНГП)",
+      "note": "Приобъектные ММ по РНГП Санкт-Петербурга. Уточните по действующей редакции.",
+      "parking": {
+        "bktK": 1.8,
+        "coefficients": {
+          "retail_food": 3,
+          "retail_nonfood": 1.5,
+          "mall": 1.5,
+          "office": 1.8,
+          "catering": 2.2,
+          "services": 1.5,
+          "hotel": 1,
+          "medical": 1.8,
+          "education": 1,
+          "sport": 2.2,
+          "culture": 1.4
+        },
+        "reductionKZones": [
+          {
+            "id": "near",
+            "label": "В пешей доступности до станции метро / остановки ОТ (до 500 м)",
+            "k": 0.9
+          },
+          {
+            "id": "far",
+            "label": "Вне зоны доступности (свыше 500 м)",
+            "k": 1
+          }
+        ]
+      },
+      "social": {
+        "zones": [
+          {
+            "id": "zone1",
+            "label": "Зона 1 (город)",
+            "douPer1000": 44,
+            "schoolPer1000": 90
+          },
+          {
+            "id": "zone2",
+            "label": "Зона 2 (сельская/малая)",
+            "douPer1000": 63,
+            "schoolPer1000": 124
+          }
+        ],
+        "defaultZone": "zone1",
+        "sqmPerPerson": 33
+      },
+      "tier": "high"
+    },
+    {
+      "id": "sevestopol",
+      "label": "Севестополь",
+      "tier": "base",
+      "source": "РНГП Севестополь (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Севестополь."
+    },
+    {
+      "id": "respublika_adygeya",
+      "label": "Республика Адыгея",
+      "tier": "base",
+      "source": "РНГП Республика Адыгея (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Республика Адыгея."
+    },
+    {
+      "id": "respublika_bashkortostan",
+      "label": "Республика Башкортостан",
+      "tier": "medium",
+      "source": "РНГП Республика Башкортостан (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «medium». Уточните по действующей редакции РНГП Республика Башкортостан."
+    },
+    {
+      "id": "respublika_buryatiya",
+      "label": "Республика Бурятия",
+      "tier": "base",
+      "source": "РНГП Республика Бурятия (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Республика Бурятия."
+    },
+    {
+      "id": "respublika_dagestan",
+      "label": "Республика Дагестан",
+      "tier": "medium",
+      "source": "РНГП Республика Дагестан (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «medium». Уточните по действующей редакции РНГП Республика Дагестан."
+    },
+    {
+      "id": "respublika_ingushetiya",
+      "label": "Республика Ингушетия",
+      "tier": "base",
+      "source": "РНГП Республика Ингушетия (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Республика Ингушетия."
+    },
+    {
+      "id": "kabardinobalkarskaya_respublika",
+      "label": "Кабардино-Балкарская Республика",
+      "tier": "base",
+      "source": "РНГП Кабардино-Балкарская Республика (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Кабардино-Балкарская Республика."
+    },
+    {
+      "id": "respublika_kalmykiya",
+      "label": "Республика Калмыкия",
+      "tier": "base",
+      "source": "РНГП Республика Калмыкия (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Республика Калмыкия."
+    },
+    {
+      "id": "karachaevocherkesskaya_respublika",
+      "label": "Карачаево-Черкесская Республика",
+      "tier": "base",
+      "source": "РНГП Карачаево-Черкесская Республика (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Карачаево-Черкесская Республика."
+    },
+    {
+      "id": "respublika_kareliya",
+      "label": "Республика Карелия",
+      "tier": "base",
+      "source": "РНГП Республика Карелия (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Республика Карелия."
+    },
+    {
+      "id": "respublika_komi",
+      "label": "Республика Коми",
+      "tier": "base",
+      "source": "РНГП Республика Коми (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Республика Коми."
+    },
+    {
+      "id": "respublika_krym",
+      "label": "Республика Крым",
+      "tier": "base",
+      "source": "РНГП Республика Крым (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Республика Крым."
+    },
+    {
+      "id": "respublika_mariy_el",
+      "label": "Республика Марий Эл",
+      "tier": "base",
+      "source": "РНГП Республика Марий Эл (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Республика Марий Эл."
+    },
+    {
+      "id": "respublika_mordoviya",
+      "label": "Республика Мордовия",
+      "tier": "base",
+      "source": "РНГП Республика Мордовия (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Республика Мордовия."
+    },
+    {
+      "id": "respublika_saha_yakutiya",
+      "label": "Республика Саха (Якутия)",
+      "tier": "base",
+      "source": "РНГП Республика Саха (Якутия) (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Республика Саха (Якутия)."
+    },
+    {
+      "id": "respublika_severnaya_osetiya_alaniya",
+      "label": "Республика Северная Осетия — Алания",
+      "tier": "base",
+      "source": "РНГП Республика Северная Осетия — Алания (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Республика Северная Осетия — Алания."
+    },
+    {
+      "id": "tatarstan",
+      "label": "Республика Татарстан",
+      "source": "РНГП Республики Татарстан (утв. постановлением Кабинета Министров РТ)",
+      "note": "Значения — рабочие, требуют уточнения по действующей редакции РНГП Республики Татарстан.",
+      "parking": {
+        "bktK": 1.5,
+        "coefficients": {
+          "retail_food": 2.8,
+          "retail_nonfood": 1.4,
+          "mall": 1.4,
+          "office": 1.6,
+          "catering": 2.2,
+          "services": 1.4,
+          "hotel": 1,
+          "medical": 1.6,
+          "education": 1,
+          "sport": 2,
+          "culture": 1.3
+        },
+        "reductionKZones": [
+          {
+            "id": "near",
+            "label": "В пешей доступности до остановки общественного транспорта (до 500 м)",
+            "k": 0.9
+          },
+          {
+            "id": "far",
+            "label": "Вне зоны доступности общественного транспорта (свыше 500 м)",
+            "k": 1
+          }
+        ]
+      },
+      "social": {
+        "zones": [
+          {
+            "id": "zone1",
+            "label": "Зона 1 (город)",
+            "douPer1000": 44,
+            "schoolPer1000": 90
+          },
+          {
+            "id": "zone2",
+            "label": "Зона 2 (сельская/малая)",
+            "douPer1000": 63,
+            "schoolPer1000": 124
+          }
+        ],
+        "defaultZone": "zone1",
+        "sqmPerPerson": 33
+      },
+      "tier": "medium"
+    },
+    {
+      "id": "respublika_tyva",
+      "label": "Республика Тыва",
+      "tier": "base",
+      "source": "РНГП Республика Тыва (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Республика Тыва."
+    },
+    {
+      "id": "udmurtskaya_respublika",
+      "label": "Удмуртская Республика",
+      "tier": "base",
+      "source": "РНГП Удмуртская Республика (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Удмуртская Республика."
+    },
+    {
+      "id": "respublika_hakasiya",
+      "label": "Республика Хакасия",
+      "tier": "base",
+      "source": "РНГП Республика Хакасия (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Республика Хакасия."
+    },
+    {
+      "id": "chechenskaya_respublika",
+      "label": "Чеченская Республика",
+      "tier": "base",
+      "source": "РНГП Чеченская Республика (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Чеченская Республика."
+    },
+    {
+      "id": "chuvashskaya_respublika",
+      "label": "Чувашская Республика",
+      "tier": "base",
+      "source": "РНГП Чувашская Республика (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Чувашская Республика."
+    },
+    {
+      "id": "respublika_altay",
+      "label": "Республика Алтай",
+      "tier": "base",
+      "source": "РНГП Республика Алтай (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Республика Алтай."
+    },
+    {
+      "id": "altayskiy_kray",
+      "label": "Алтайский край",
+      "tier": "base",
+      "source": "РНГП Алтайский край (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Алтайский край."
+    },
+    {
+      "id": "zabaykalskiy_kray",
+      "label": "Забайкальский край",
+      "tier": "base",
+      "source": "РНГП Забайкальский край (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Забайкальский край."
+    },
+    {
+      "id": "kamchatskiy_kray",
+      "label": "Камчатский край",
+      "tier": "base",
+      "source": "РНГП Камчатский край (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Камчатский край."
+    },
+    {
+      "id": "krasnodar",
+      "label": "Краснодарский край",
+      "source": "РНГП Краснодарского края (утв. постановлением Главы Администрации Краснодарского края)",
+      "note": "Значения — рабочие, требуют уточнения по действующей редакции РНГП Краснодарского края.",
+      "parking": {
+        "bktK": 1.5,
+        "coefficients": {
+          "retail_food": 2.8,
+          "retail_nonfood": 1.4,
+          "mall": 1.4,
+          "office": 1.6,
+          "catering": 2.2,
+          "services": 1.4,
+          "hotel": 1.2,
+          "medical": 1.6,
+          "education": 1,
+          "sport": 2,
+          "culture": 1.3
+        },
+        "reductionKZones": [
+          {
+            "id": "near",
+            "label": "В пешей доступности до остановки общественного транспорта (до 500 м)",
+            "k": 0.9
+          },
+          {
+            "id": "far",
+            "label": "Вне зоны доступности общественного транспорта (свыше 500 м)",
+            "k": 1
+          }
+        ]
+      },
+      "social": {
+        "zones": [
+          {
+            "id": "zone1",
+            "label": "Зона 1 (город)",
+            "douPer1000": 44,
+            "schoolPer1000": 90
+          },
+          {
+            "id": "zone2",
+            "label": "Зона 2 (сельская/малая)",
+            "douPer1000": 63,
+            "schoolPer1000": 124
+          }
+        ],
+        "defaultZone": "zone1",
+        "sqmPerPerson": 33
+      },
+      "tier": "medium"
+    },
+    {
+      "id": "krasnoyarskiy_kray",
+      "label": "Красноярский край",
+      "tier": "medium",
+      "source": "РНГП Красноярский край (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «medium». Уточните по действующей редакции РНГП Красноярский край."
+    },
+    {
+      "id": "permskiy_kray",
+      "label": "Пермский край",
+      "tier": "medium",
+      "source": "РНГП Пермский край (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «medium». Уточните по действующей редакции РНГП Пермский край."
+    },
+    {
+      "id": "primorskiy_kray",
+      "label": "Приморский край",
+      "tier": "medium",
+      "source": "РНГП Приморский край (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «medium». Уточните по действующей редакции РНГП Приморский край."
+    },
+    {
+      "id": "stavropolskiy_kray",
+      "label": "Ставропольский край",
+      "tier": "medium",
+      "source": "РНГП Ставропольский край (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «medium». Уточните по действующей редакции РНГП Ставропольский край."
+    },
+    {
+      "id": "habarovskiy_kray",
+      "label": "Хабаровский край",
+      "tier": "medium",
+      "source": "РНГП Хабаровский край (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «medium». Уточните по действующей редакции РНГП Хабаровский край."
+    },
+    {
+      "id": "amurskaya_oblast",
+      "label": "Амурская область",
+      "tier": "base",
+      "source": "РНГП Амурская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Амурская область."
+    },
+    {
+      "id": "arhangelskaya_oblast",
+      "label": "Архангельская область",
+      "tier": "base",
+      "source": "РНГП Архангельская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Архангельская область."
+    },
+    {
+      "id": "astrahanskaya_oblast",
+      "label": "Астраханская область",
+      "tier": "medium",
+      "source": "РНГП Астраханская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «medium». Уточните по действующей редакции РНГП Астраханская область."
+    },
+    {
+      "id": "belgorodskaya_oblast",
+      "label": "Белгородская область",
+      "tier": "base",
+      "source": "РНГП Белгородская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Белгородская область."
+    },
+    {
+      "id": "bryanskaya_oblast",
+      "label": "Брянская область",
+      "tier": "base",
+      "source": "РНГП Брянская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Брянская область."
+    },
+    {
+      "id": "vladimirskaya_oblast",
+      "label": "Владимирская область",
+      "tier": "base",
+      "source": "РНГП Владимирская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Владимирская область."
+    },
+    {
+      "id": "volgogradskaya_oblast",
+      "label": "Волгоградская область",
+      "tier": "medium",
+      "source": "РНГП Волгоградская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «medium». Уточните по действующей редакции РНГП Волгоградская область."
+    },
+    {
+      "id": "vologodskaya_oblast",
+      "label": "Вологодская область",
+      "tier": "base",
+      "source": "РНГП Вологодская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Вологодская область."
+    },
+    {
+      "id": "voronezhskaya_oblast",
+      "label": "Воронежская область",
+      "tier": "medium",
+      "source": "РНГП Воронежская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «medium». Уточните по действующей редакции РНГП Воронежская область."
+    },
+    {
+      "id": "ivanovskaya_oblast",
+      "label": "Ивановская область",
+      "tier": "base",
+      "source": "РНГП Ивановская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Ивановская область."
+    },
+    {
+      "id": "irkutskaya_oblast",
+      "label": "Иркутская область",
+      "tier": "medium",
+      "source": "РНГП Иркутская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «medium». Уточните по действующей редакции РНГП Иркутская область."
+    },
+    {
+      "id": "kaliningradskaya_oblast",
+      "label": "Калининградская область",
+      "tier": "medium",
+      "source": "РНГП Калининградская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «medium». Уточните по действующей редакции РНГП Калининградская область."
+    },
+    {
+      "id": "kaluzhskaya_oblast",
+      "label": "Калужская область",
+      "tier": "base",
+      "source": "РНГП Калужская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Калужская область."
+    },
+    {
+      "id": "kemerovskaya_oblast_kuzbass",
+      "label": "Кемеровская область — Кузбасс",
+      "tier": "base",
+      "source": "РНГП Кемеровская область — Кузбасс (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Кемеровская область — Кузбасс."
+    },
+    {
+      "id": "kirovskaya_oblast",
+      "label": "Кировская область",
+      "tier": "base",
+      "source": "РНГП Кировская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Кировская область."
+    },
+    {
+      "id": "kostromskaya_oblast",
+      "label": "Костромская область",
+      "tier": "base",
+      "source": "РНГП Костромская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Костромская область."
+    },
+    {
+      "id": "kurganskaya_oblast",
+      "label": "Курганская область",
+      "tier": "base",
+      "source": "РНГП Курганская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Курганская область."
+    },
+    {
+      "id": "kurskaya_oblast",
+      "label": "Курская область",
+      "tier": "base",
+      "source": "РНГП Курская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Курская область."
+    },
+    {
+      "id": "lenobl",
+      "label": "Ленинградская область",
+      "source": "РНГП Ленинградской области (утв. постановлением Правительства Ленинградской области)",
+      "note": "Значения — рабочие, требуют уточнения по действующей редакции РНГП Ленинградской области. Уровень обеспеченности ДОУ в ЛО повышен с 60 до 61 места/1000 (городские и сельские поселения, кроме отдельных сельских).",
+      "parking": {
+        "bktK": 1.6,
+        "coefficients": {
+          "retail_food": 3,
+          "retail_nonfood": 1.5,
+          "mall": 1.5,
+          "office": 1.7,
+          "catering": 2.2,
+          "services": 1.5,
+          "hotel": 1,
+          "medical": 1.7,
+          "education": 1,
+          "sport": 2.2,
+          "culture": 1.4
+        },
+        "reductionKZones": [
+          {
+            "id": "near",
+            "label": "В пешей доступности до станции метро / остановки ОТ (до 500 м)",
+            "k": 0.9
+          },
+          {
+            "id": "far",
+            "label": "Вне зоны доступности (свыше 500 м)",
+            "k": 1
+          }
+        ]
+      },
+      "social": {
+        "zones": [
+          {
+            "id": "zone1",
+            "label": "Зона 1 (город)",
+            "douPer1000": 44,
+            "schoolPer1000": 90
+          },
+          {
+            "id": "zone2",
+            "label": "Зона 2 (сельская/малая)",
+            "douPer1000": 63,
+            "schoolPer1000": 124
+          }
+        ],
+        "defaultZone": "zone1",
+        "sqmPerPerson": 33
+      },
+      "tier": "medium"
+    },
+    {
+      "id": "lipeckaya_oblast",
+      "label": "Липецкая область",
+      "tier": "base",
+      "source": "РНГП Липецкая область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Липецкая область."
+    },
+    {
+      "id": "magadanskaya_oblast",
+      "label": "Магаданская область",
+      "tier": "base",
+      "source": "РНГП Магаданская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Магаданская область."
+    },
+    {
+      "id": "mo",
+      "label": "Московская область",
+      "source": "РНГП Московской области (утв. постановлением Правительства МО)",
+      "note": "Приобъектные ММ по РНГП Московской области. Уточните по действующей редакции РНГП МО.",
+      "parking": {
+        "bktK": 1.6,
+        "coefficients": {
+          "retail_food": 3,
+          "retail_nonfood": 1.4,
+          "mall": 1.4,
+          "office": 1.6,
+          "catering": 2,
+          "services": 1.4,
+          "hotel": 1,
+          "medical": 1.6,
+          "education": 1,
+          "sport": 2,
+          "culture": 1.2
+        },
+        "reductionKZones": [
+          {
+            "id": "near",
+            "label": "В пешей доступности до остановки общественного транспорта (до 500 м)",
+            "k": 0.9
+          },
+          {
+            "id": "far",
+            "label": "Вне зоны доступности общественного транспорта (свыше 500 м)",
+            "k": 1
+          }
+        ]
+      },
+      "social": {
+        "zones": [
+          {
+            "id": "zone1",
+            "label": "Зона 1 (город)",
+            "douPer1000": 44,
+            "schoolPer1000": 90
+          },
+          {
+            "id": "zone2",
+            "label": "Зона 2 (сельская/малая)",
+            "douPer1000": 63,
+            "schoolPer1000": 124
+          }
+        ],
+        "defaultZone": "zone1",
+        "sqmPerPerson": 33
+      },
+      "tier": "medium"
+    },
+    {
+      "id": "murmanskaya_oblast",
+      "label": "Мурманская область",
+      "tier": "base",
+      "source": "РНГП Мурманская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Мурманская область."
+    },
+    {
+      "id": "nizhegorodskaya_oblast",
+      "label": "Нижегородская область",
+      "tier": "medium",
+      "source": "РНГП Нижегородская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «medium». Уточните по действующей редакции РНГП Нижегородская область."
+    },
+    {
+      "id": "novgorodskaya_oblast",
+      "label": "Новгородская область",
+      "tier": "base",
+      "source": "РНГП Новгородская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Новгородская область."
+    },
+    {
+      "id": "novosibirsk",
+      "label": "Новосибирская область",
+      "source": "РНГП Новосибирской области (утв. постановлением Правительства Новосибирской области)",
+      "note": "Значения — рабочие, требуют уточнения по действующей редакции РНГП Новосибирской области.",
+      "parking": {
+        "bktK": 1.5,
+        "coefficients": {
+          "retail_food": 2.6,
+          "retail_nonfood": 1.4,
+          "mall": 1.4,
+          "office": 1.5,
+          "catering": 2,
+          "services": 1.4,
+          "hotel": 1,
+          "medical": 1.5,
+          "education": 1,
+          "sport": 2,
+          "culture": 1.2
+        },
+        "reductionKZones": [
+          {
+            "id": "near",
+            "label": "В пешей доступности до остановки общественного транспорта (до 500 м)",
+            "k": 0.9
+          },
+          {
+            "id": "far",
+            "label": "Вне зоны доступности общественного транспорта (свыше 500 м)",
+            "k": 1
+          }
+        ]
+      },
+      "social": {
+        "zones": [
+          {
+            "id": "zone1",
+            "label": "Зона 1 (город)",
+            "douPer1000": 44,
+            "schoolPer1000": 90
+          },
+          {
+            "id": "zone2",
+            "label": "Зона 2 (сельская/малая)",
+            "douPer1000": 63,
+            "schoolPer1000": 124
+          }
+        ],
+        "defaultZone": "zone1",
+        "sqmPerPerson": 33
+      },
+      "tier": "medium"
+    },
+    {
+      "id": "omskaya_oblast",
+      "label": "Омская область",
+      "tier": "medium",
+      "source": "РНГП Омская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «medium». Уточните по действующей редакции РНГП Омская область."
+    },
+    {
+      "id": "orenburgskaya_oblast",
+      "label": "Оренбургская область",
+      "tier": "base",
+      "source": "РНГП Оренбургская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Оренбургская область."
+    },
+    {
+      "id": "orlovskaya_oblast",
+      "label": "Орловская область",
+      "tier": "base",
+      "source": "РНГП Орловская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Орловская область."
+    },
+    {
+      "id": "penzenskaya_oblast",
+      "label": "Пензенская область",
+      "tier": "base",
+      "source": "РНГП Пензенская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Пензенская область."
+    },
+    {
+      "id": "pskovskaya_oblast",
+      "label": "Псковская область",
+      "tier": "base",
+      "source": "РНГП Псковская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Псковская область."
+    },
+    {
+      "id": "rostovskaya_oblast",
+      "label": "Ростовская область",
+      "tier": "medium",
+      "source": "РНГП Ростовская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «medium». Уточните по действующей редакции РНГП Ростовская область."
+    },
+    {
+      "id": "ryazanskaya_oblast",
+      "label": "Рязанская область",
+      "tier": "base",
+      "source": "РНГП Рязанская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Рязанская область."
+    },
+    {
+      "id": "samarskaya_oblast",
+      "label": "Самарская область",
+      "tier": "medium",
+      "source": "РНГП Самарская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «medium». Уточните по действующей редакции РНГП Самарская область."
+    },
+    {
+      "id": "saratovskaya_oblast",
+      "label": "Саратовская область",
+      "tier": "medium",
+      "source": "РНГП Саратовская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «medium». Уточните по действующей редакции РНГП Саратовская область."
+    },
+    {
+      "id": "sahalinskaya_oblast",
+      "label": "Сахалинская область",
+      "tier": "base",
+      "source": "РНГП Сахалинская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Сахалинская область."
+    },
+    {
+      "id": "sverdlovsk",
+      "label": "Свердловская область",
+      "source": "РНГП Свердловской области (утв. постановлением Правительства Свердловской области)",
+      "note": "Значения — рабочие, требуют уточнения по действующей редакции РНГП Свердловской области.",
+      "parking": {
+        "bktK": 1.5,
+        "coefficients": {
+          "retail_food": 2.6,
+          "retail_nonfood": 1.4,
+          "mall": 1.4,
+          "office": 1.5,
+          "catering": 2,
+          "services": 1.4,
+          "hotel": 1,
+          "medical": 1.5,
+          "education": 1,
+          "sport": 2,
+          "culture": 1.2
+        },
+        "reductionKZones": [
+          {
+            "id": "near",
+            "label": "В пешей доступности до остановки общественного транспорта (до 500 м)",
+            "k": 0.9
+          },
+          {
+            "id": "far",
+            "label": "Вне зоны доступности общественного транспорта (свыше 500 м)",
+            "k": 1
+          }
+        ]
+      },
+      "social": {
+        "zones": [
+          {
+            "id": "zone1",
+            "label": "Зона 1 (город)",
+            "douPer1000": 44,
+            "schoolPer1000": 90
+          },
+          {
+            "id": "zone2",
+            "label": "Зона 2 (сельская/малая)",
+            "douPer1000": 63,
+            "schoolPer1000": 124
+          }
+        ],
+        "defaultZone": "zone1",
+        "sqmPerPerson": 33
+      },
+      "tier": "medium"
+    },
+    {
+      "id": "smolenskaya_oblast",
+      "label": "Смоленская область",
+      "tier": "base",
+      "source": "РНГП Смоленская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Смоленская область."
+    },
+    {
+      "id": "tambovskaya_oblast",
+      "label": "Тамбовская область",
+      "tier": "base",
+      "source": "РНГП Тамбовская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Тамбовская область."
+    },
+    {
+      "id": "tverskaya_oblast",
+      "label": "Тверская область",
+      "tier": "base",
+      "source": "РНГП Тверская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Тверская область."
+    },
+    {
+      "id": "tomskaya_oblast",
+      "label": "Томская область",
+      "tier": "medium",
+      "source": "РНГП Томская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «medium». Уточните по действующей редакции РНГП Томская область."
+    },
+    {
+      "id": "tulskaya_oblast",
+      "label": "Тульская область",
+      "tier": "base",
+      "source": "РНГП Тульская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Тульская область."
+    },
+    {
+      "id": "tyumenskaya_oblast",
+      "label": "Тюменская область",
+      "tier": "medium",
+      "source": "РНГП Тюменская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «medium». Уточните по действующей редакции РНГП Тюменская область."
+    },
+    {
+      "id": "ulyanovskaya_oblast",
+      "label": "Ульяновская область",
+      "tier": "medium",
+      "source": "РНГП Ульяновская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «medium». Уточните по действующей редакции РНГП Ульяновская область."
+    },
+    {
+      "id": "chelyabinskaya_oblast",
+      "label": "Челябинская область",
+      "tier": "medium",
+      "source": "РНГП Челябинская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «medium». Уточните по действующей редакции РНГП Челябинская область."
+    },
+    {
+      "id": "yaroslavskaya_oblast",
+      "label": "Ярославская область",
+      "tier": "base",
+      "source": "РНГП Ярославская область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Ярославская область."
+    },
+    {
+      "id": "evreyskaya_avtonomnaya_oblast",
+      "label": "Еврейская автономная область",
+      "tier": "base",
+      "source": "РНГП Еврейская автономная область (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Еврейская автономная область."
+    },
+    {
+      "id": "neneckiy_avtonomnyy_okrug",
+      "label": "Ненецкий автономный округ",
+      "tier": "base",
+      "source": "РНГП Ненецкий автономный округ (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Ненецкий автономный округ."
+    },
+    {
+      "id": "hantymansiyskiy_avtonomnyy_okrug_yugra",
+      "label": "Ханты-Мансийский автономный округ — Югра",
+      "tier": "medium",
+      "source": "РНГП Ханты-Мансийский автономный округ — Югра (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «medium». Уточните по действующей редакции РНГП Ханты-Мансийский автономный округ — Югра."
+    },
+    {
+      "id": "chukotskiy_avtonomnyy_okrug",
+      "label": "Чукотский автономный округ",
+      "tier": "base",
+      "source": "РНГП Чукотский автономный округ (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Чукотский автономный округ."
+    },
+    {
+      "id": "yamaloneneckiy_avtonomnyy_okrug",
+      "label": "Ямало-Ненецкий автономный округ",
+      "tier": "base",
+      "source": "РНГП Ямало-Ненецкий автономный округ (требует сверки с действующей редакцией)",
+      "note": "Значения — рабочие, по уровню «base». Уточните по действующей редакции РНГП Ямало-Ненецкий автономный округ."
+    }
+  ],
+  "legalActs": [
+    {
+      "id": "sp42",
+      "code": "СП 42.13330.2016 (ред. № 3 от 09.06.2022)",
+      "title": "Городское планирование. Правила проектирования (приложение Ж — обеспеченность машино-местами)",
+      "status": "actual",
+      "note": "Действующая редакция"
+    },
+    {
+      "id": "prikaz250",
+      "code": "Приказ Минстроя РФ № 250/пр от 23.04.2025",
+      "title": "Федеральные минимумы показателей обеспеченности машино-местами",
+      "status": "actual",
+      "note": "Региональные нормативы не могут быть ниже федерального минимума"
+    },
+    {
+      "id": "pp945",
+      "code": "ПП г. Москвы № 945-ПП от 25.12.2015 (ред.)",
+      "title": "О минимальных показателях обеспечения машино-местами (Москва)",
+      "status": "actual",
+      "note": "Для Москвы заменяет федеральную базу по жилым объектам"
+    },
+    {
+      "id": "sp59",
+      "code": "СП 59.13330.2020",
+      "title": "Барьерная среда. Среда обитания лиц с ОВЗ (лифты, места МГН)",
+      "status": "actual"
+    },
+    {
+      "id": "sp113",
+      "code": "СП 113.13330.2023",
+      "title": "Автостоянки для автомобильного транспорта. Правила проектирования",
+      "status": "actual"
+    },
+    {
+      "id": "fz181",
+      "code": "ФЗ № 181-ФЗ «О социальной защите инвалидов в РФ»",
+      "title": "Квота мест для МГН — не менее 10 % (ст. 15)",
+      "status": "actual"
+    },
+    {
+      "id": "sp54",
+      "code": "СП 54.13330.2022",
+      "title": "Здания жилые. Правила проектирования (лифты)",
+      "status": "actual"
+    },
+    {
+      "id": "sp118",
+      "code": "СП 118.13330",
+      "title": "Здания. Лифты (общественные/производственные здания)",
+      "status": "actual"
+    },
+    {
+      "id": "gost34758",
+      "code": "ГОСТ 34758-2021",
+      "title": "Требования безопасности к лифтам, параметры кабины",
+      "status": "actual"
+    },
+    {
+      "id": "sanpin",
+      "code": "СанПиН 2.1.3684-21",
+      "title": "Санитарно-эпидемиологические требования к условиям проживания (накопление ТКО)",
+      "status": "actual"
+    },
+    {
+      "id": "fz89",
+      "code": "ФЗ № 89-ФЗ «Об отходах производства и потребления»",
+      "title": "Региональные акты об утверждении нормативов накопления ТКО",
+      "status": "actual"
+    },
+    {
+      "id": "sp158",
+      "code": "СП 158.13330.2014",
+      "title": "Здания и помещения здравоохранения. Правила проектирования (поликлиники)",
+      "status": "actual"
+    },
+    {
+      "id": "pp2152",
+      "code": "ПП г. Москвы № 2152-ПП",
+      "title": "Нормативы численности населения для расчёта обеспеченности объектами социнфраструктуры",
+      "status": "actual"
+    },
+    {
+      "id": "pp2151",
+      "code": "ПП г. Москвы № 2151-ПП в ред. № 921-ПП от 28.04.2025",
+      "title": "Обеспеченность объектами образования (ДОУ, школы), типоразмеры",
+      "status": "actual"
+    },
+    {
+      "id": "rnhp",
+      "code": "РНГП/МНГП субъектов РФ (сводная база калькулятора)",
+      "title": "Региональные нормативы городского планирования (86 регионов)",
+      "status": "changed",
+      "note": "Значения по регионам заданы по уровням (tier) и являются рабочими",
+      "replacement": "Требуется сверка с действующими редакциями РНГП/МНГП конкретного субъекта РФ",
+      "recommend": "Сверить применяемые K_i и нормы социальной обеспеченности с действующей редакцией РНГП/МНГП региона; при расхождении — выполнить пересчёт и актуализировать данные"
+    }
+  ],
+  "parking": {
+    "title": "Машиноместа",
+    "document": {
+      "code": "Постановление Правительства Москвы № 945-ПП",
+      "fullTitle": "Постановление Правительства Москвы от 23.12.2015 № 945-ПП (в редакции проекта постановления «О внесении изменений в постановление Правительства Москвы от 23 декабря 2015 г. № 945-ПП»)",
+      "edition": "project-2026"
+    },
+    "defaultRegion": "sp42_federal",
+    "federalMinimum": {
+      "source": "Приказ Минстроя РФ № 250/пр от 23.04.2025; СП 42.13330.2016 (ред. № 3 от 09.06.2022), прил. Ж, табл. Ж.1",
+      "note": "Если региональный норматив (РНГП/МНГП) ниже федерального минимума — применяется федеральное значение и выдаётся предупреждение",
+      "bktK": 1.5,
+      "coefficients": {
+        "retail_food": 2.5,
+        "retail_nonfood": 1.4,
+        "mall": 1.4,
+        "office": 1.5,
+        "catering": 2,
+        "services": 1.4,
+        "hotel": 1,
+        "medical": 1.5,
+        "education": 1,
+        "sport": 2,
+        "culture": 1.2
+      },
+      "object": {
+        "mall": {
+          "районный": 1,
+          "окружной": 1.3,
+          "региональный": 1.7
+        },
+        "office": {
+          "per100m2": 1
+        },
+        "education": {
+          "per100m2": 1.4
+        },
+        "medical": {
+          "per100m2": 2
+        }
+      }
+    },
+    "groups": [
+      {
+        "id": "f1",
+        "label": "Квартиры до 70 м²",
+        "coefficient": 0.8
+      },
+      {
+        "id": "f2",
+        "label": "Квартиры 70–100 м²",
+        "coefficient": 1.2
+      },
+      {
+        "id": "f3",
+        "label": "Квартиры свыше 100 м²",
+        "coefficient": 1.6
+      }
+    ],
+    "constants": {
+      "guestPct": 0.1,
+      "mgnTotalPct": 0.1,
+      "mgnSpecialOfGuestPct": 0.1,
+      "mgnSpecialOfObjectPct": 0.1
+    },
+    "reductionK": {
+      "title": "Понижающий коэффициент",
+      "refPoint": "ПП-945 (п. 6.2.4) / РНГП-МНГП региона — коэффициент доступности рельсового каркаса / транспортной доступности",
+      "note": "Понижающий коэффициент применяется к числу постоянных машино-мест (столбец «Машино-места»): N_итог = ⌈N_расч × k⌉. При k = 1 понижение не применяется. Зоны и значения k берутся из выбранного региона.",
+      "options": [
+        {
+          "id": "none",
+          "label": "Нет (k = 1)",
+          "k": 1
+        },
+        {
+          "id": "byAccessibility",
+          "label": "К по транспортной доступности (из РНГП/МНГП региона)",
+          "kind": "byAccessibility"
+        }
+      ],
+      "defaultOption": "none"
+    },
+    "electricVehicles": {
+      "title": "Электромобили",
+      "refPoint": "СП 42.13330.2016; ПП РФ (зарядная инфраструктура)",
+      "percent": 0.1,
+      "note": "10 % от постоянных машино-мест; округление вверх, не менее 1",
+      "infrastructureNote": "Инженерная инфраструктура: кабель-каналы или шинопроводы учесть на 100 % машино-мест."
+    },
+    "objectFacilities": {
+      "title": "Приобъектные (коммерция)",
+      "refPoint": "РНГП/МНГП региона; Приложение Ж СП 42.13330.2016; СП 113.13330.2023",
+      "note": "Оба режима считают по общей площади: N = S / 100 × K × f. Режим «БКТ» — один общий коэффициент на весь объект (без разбивки по функциям). Режим «Функции» — разбивка по функциональным группам, у каждой своя площадь S_i и коэффициент K_i. Итог — максимум по сценариям.",
+      "unitOptions": [
+        {
+          "id": "per100m2",
+          "label": "мест на 100 м² общей площади",
+          "divisor": 100
+        }
+      ],
+      "functions": [
+        {
+          "id": "retail_food",
+          "label": "Магазины продовольственные",
+          "unit": "per100m2",
+          "K": 2.5,
+          "E": 0
+        },
+        {
+          "id": "retail_nonfood",
+          "label": "Магазины непродовольственные",
+          "unit": "per100m2",
+          "K": 1.4,
+          "E": 0
+        },
+        {
+          "id": "mall",
+          "label": "Торговые центры / комплексы",
+          "unit": "per100m2",
+          "K": 1.4,
+          "E": 0
+        },
+        {
+          "id": "office",
+          "label": "Офисы / административные здания",
+          "unit": "per100m2",
+          "K": 1.5,
+          "E": 0
+        },
+        {
+          "id": "catering",
+          "label": "Общепит (кафе, ресторан)",
+          "unit": "per100m2",
+          "K": 2,
+          "E": 0
+        },
+        {
+          "id": "services",
+          "label": "Бытовое обслуживание",
+          "unit": "per100m2",
+          "K": 1.4,
+          "E": 0
+        },
+        {
+          "id": "hotel",
+          "label": "Гостиницы",
+          "unit": "per100m2",
+          "K": 1,
+          "E": 0
+        },
+        {
+          "id": "medical",
+          "label": "Поликлиники и медцентры",
+          "unit": "per100m2",
+          "K": 1.5,
+          "E": 0
+        },
+        {
+          "id": "education",
+          "label": "Образование (школы, ДОУ)",
+          "unit": "per100m2",
+          "K": 1,
+          "E": 0
+        },
+        {
+          "id": "sport",
+          "label": "Спортивные объекты",
+          "unit": "per100m2",
+          "K": 2,
+          "E": 0
+        },
+        {
+          "id": "culture",
+          "label": "Культурно-зрелищные объекты",
+          "unit": "per100m2",
+          "K": 1.2,
+          "E": 0
+        }
+      ],
+      "scenarios": [
+        {
+          "id": "s1",
+          "label": "Функция коммерческих помещений"
+        }
+      ]
+    },
+    "mgn": {
+      "title": "Места для МГН",
+      "legalQuota": {
+        "percent": 0.1,
+        "min": 1,
+        "refPoint": "Федеральный закон № 181-ФЗ, ст. 15 (ред. от 29.12.2025)"
+      },
+      "specialScale": {
+        "refPoint": "СП 59.13330.2020, п. 5.2.1 (округление вверх)",
+        "ranges": [
+          {
+            "maxN": 100,
+            "base": 0,
+            "percent": 0.05,
+            "over": 0
+          },
+          {
+            "maxN": 200,
+            "base": 5,
+            "percent": 0.03,
+            "over": 100
+          },
+          {
+            "maxN": 500,
+            "base": 8,
+            "percent": 0.02,
+            "over": 200
+          },
+          {
+            "maxN": null,
+            "base": 14,
+            "percent": 0.01,
+            "over": 500
+          }
+        ]
+      },
+      "dimensions": {
+        "standard": "5,3 × 2,5 м (приложение А к СП 113.13330.2023)",
+        "special": "6,0 × 3,6 м; вдоль проезжей части длина 6,8 м (СП 59.13330.2020, п. 5.2.4; СП 113.13330.2023, п. 5.6)",
+        "standardArea": 13.25,
+        "specialArea": 21.6,
+        "refPoint": "СП 113.13330.2023; СП 59.13330.2020"
+      }
+    },
+    "additional": [
+      {
+        "id": "guest",
+        "name": "Гостевые машиноместа",
+        "type": "percentOfPermanent",
+        "percent": 0.1,
+        "rounding": "ceil",
+        "includeByDefault": true,
+        "note": "10 % от постоянных",
+        "refPoint": "РНГП/МНГП региона; СП 42.13330.2016"
+      }
+    ],
+    "refs": [
+      {
+        "point": "Приложение 5, п. 1.2",
+        "requirement": "Nп = F1×0,8 + F2×1,2 + F3×1,6 (группы по площади квартир)",
+        "applied": "Применена формула по фактическим F1–F3"
+      },
+      {
+        "point": "РНГП/МНГП региона",
+        "requirement": "Нормативный коэффициент K_i (мест на расчётную единицу) по каждой функции объекта; понижающие/повышающие коэффициенты f",
+        "applied": "Приобъектные ММ: N_баз = Σ(K_i × E_i) × f; при нескольких сценариях — max"
+      },
+      {
+        "point": "п. 6.2.4.2",
+        "requirement": "При отклонении более чем на 10 % в большую сторону — решение ГЗК Москвы (с заключением уполномоченного органа и Дептранса)",
+        "applied": "Отражается справочно"
+      },
+      {
+        "point": "СП 113.13330.2023",
+        "requirement": "Стоянки автомобилей: габариты машино-места — минимум 5,3 × 2,5 м (приложение А)",
+        "applied": "Габариты обычного места"
+      },
+      {
+        "point": "Федеральный закон № 181-ФЗ, ст. 15 (ред. от 29.12.2025)",
+        "requirement": "Не менее 10 % мест (но не менее одного) для ТС инвалидов I–II групп и перевозящих их",
+        "applied": "Квота МГН = max(1, ⌈0,10 × N_общ⌉)"
+      },
+      {
+        "point": "СП 59.13330.2020, п. 5.2.1",
+        "requirement": "Число специализированных мест (расширенных 6,0 × 3,6 м): N≤100 → ⌈0,05×N⌉ (не менее 1); 101–200 → 5+⌈0,03×(N−100)⌉; 201–500 → 8+⌈0,02×(N−200)⌉; N≥501 → 14+⌈0,01×(N−500)⌉",
+        "applied": "Шкала специализированных мест; округление вверх"
+      },
+      {
+        "point": "СП 113.13330.2023, п. 5.6; СП 59.13330.2020, п. 5.2.4",
+        "requirement": "Специализированное место для инвалида на кресле-коляске — 6,0 × 3,6 м; вдоль проезжей части длина 6,8 м",
+        "applied": "Габариты специализированного места"
+      }
+    ],
+    "tiers": {
+      "high": {
+        "bktK": 2,
+        "coefficients": {
+          "retail_food": 4,
+          "retail_nonfood": 1.6,
+          "mall": 1.6,
+          "office": 2,
+          "catering": 2.5,
+          "services": 1.6,
+          "hotel": 1,
+          "medical": 2,
+          "education": 1,
+          "sport": 2.5,
+          "culture": 1.5
+        },
+        "reductionKZones": [
+          {
+            "id": "walk",
+            "label": "В пешей доступности до рельсового каркаса (метро / МЦК / МЦД), до 500 м",
+            "k": 0.75
+          },
+          {
+            "id": "near",
+            "label": "В зоне транспортной доступности, 500–1200 м",
+            "k": 0.85
+          },
+          {
+            "id": "far",
+            "label": "Вне зоны доступности рельсового каркаса, свыше 1200 м",
+            "k": 1
+          }
+        ],
+        "object": {
+          "housing": {
+            "социальное": 0.5,
+            "эконом": 0.7,
+            "комфорт": 0.9,
+            "бизнес": 1.2,
+            "премиум": 1.6
+          },
+          "mall": {
+            "районный": 1.2,
+            "окружной": 1.5,
+            "региональный": 2
+          },
+          "office": {
+            "per100m2": 1.5,
+            "perEmployee": 1.2
+          },
+          "education": {
+            "per100m2": 2,
+            "perPlace": 0.1
+          },
+          "medical": {
+            "per100m2": 2.5,
+            "perPlace": 0.12
+          },
+          "otReduction": 0.75
+        }
+      },
+      "medium": {
+        "bktK": 1.6,
+        "coefficients": {
+          "retail_food": 3,
+          "retail_nonfood": 1.4,
+          "mall": 1.4,
+          "office": 1.6,
+          "catering": 2,
+          "services": 1.4,
+          "hotel": 1,
+          "medical": 1.6,
+          "education": 1,
+          "sport": 2,
+          "culture": 1.2
+        },
+        "reductionKZones": [
+          {
+            "id": "near",
+            "label": "В пешей доступности до остановки общественного транспорта / станции (до 500 м)",
+            "k": 0.85
+          },
+          {
+            "id": "far",
+            "label": "Вне зоны доступности общественного транспорта (свыше 500 м)",
+            "k": 1
+          }
+        ],
+        "object": {
+          "housing": {
+            "социальное": 0.45,
+            "эконом": 0.65,
+            "комфорт": 0.85,
+            "бизнес": 1.1,
+            "премиум": 1.3
+          },
+          "mall": {
+            "районный": 1.1,
+            "окружной": 1.4,
+            "региональный": 1.8
+          },
+          "office": {
+            "per100m2": 1.3,
+            "perEmployee": 1.1
+          },
+          "education": {
+            "per100m2": 1.6,
+            "perPlace": 0.09
+          },
+          "medical": {
+            "per100m2": 2.2,
+            "perPlace": 0.11
+          },
+          "otReduction": 0.8
+        }
+      },
+      "base": {
+        "bktK": 1.5,
+        "coefficients": {
+          "retail_food": 2.5,
+          "retail_nonfood": 1.4,
+          "mall": 1.4,
+          "office": 1.5,
+          "catering": 2,
+          "services": 1.4,
+          "hotel": 1,
+          "medical": 1.5,
+          "education": 1,
+          "sport": 2,
+          "culture": 1.2
+        },
+        "reductionKZones": [
+          {
+            "id": "near",
+            "label": "В пешей доступности до остановки общественного транспорта (до 500 м)",
+            "k": 0.9
+          },
+          {
+            "id": "far",
+            "label": "Вне зоны доступности общественного транспорта (свыше 500 м)",
+            "k": 1
+          }
+        ],
+        "object": {
+          "housing": {
+            "социальное": 0.4,
+            "эконом": 0.6,
+            "комфорт": 0.8,
+            "бизнес": 1,
+            "премиум": 1.2
+          },
+          "mall": {
+            "районный": 1,
+            "окружной": 1.3,
+            "региональный": 1.7
+          },
+          "office": {
+            "per100m2": 1,
+            "perEmployee": 1
+          },
+          "education": {
+            "per100m2": 1.4,
+            "perPlace": 0.08
+          },
+          "medical": {
+            "per100m2": 2,
+            "perPlace": 0.1
+          },
+          "otReduction": 0.85
+        }
+      }
+    },
+    "objectTypes": [
+      {
+        "id": "жилой",
+        "label": "МКД"
+      },
+      {
+        "id": "торговый",
+        "label": "ТЦ"
+      },
+      {
+        "id": "школа",
+        "label": "Школа"
+      },
+      {
+        "id": "поликлиника",
+        "label": "Поликлиника"
+      },
+      {
+        "id": "офисный",
+        "label": "Офис"
+      },
+      {
+        "id": "многофункциональный",
+        "label": "МФН (многофункциональный)"
+      }
+    ],
+    "designStages": [
+      {
+        "id": "ПП",
+        "label": "ПП — проектная документация"
+      },
+      {
+        "id": "ПД",
+        "label": "ПД — рабочая документация"
+      }
+    ],
+    "housingClasses": [
+      {
+        "id": "социальное",
+        "label": "Социальное"
+      },
+      {
+        "id": "эконом",
+        "label": "Эконом"
+      },
+      {
+        "id": "комфорт",
+        "label": "Комфорт"
+      },
+      {
+        "id": "бизнес",
+        "label": "Бизнес"
+      },
+      {
+        "id": "премиум",
+        "label": "Премиум"
+      }
+    ],
+    "mallTypes": [
+      {
+        "id": "районный",
+        "label": "Районный"
+      },
+      {
+        "id": "окружной",
+        "label": "Окружной"
+      },
+      {
+        "id": "региональный",
+        "label": "Региональный"
+      }
+    ],
+    "objectCoefficients": {
+      "otReductionNote": "Близость к ОТ (метро/МЦД/крупные остановки): понижающий коэффициент до 25 % при подтверждённой доступности.",
+      "mfnBuffer": 1.1,
+      "mfnBufferNote": "Многофункциональность: буфер +10 % на покрытие пиковых нагрузок разных функций.",
+      "sharedUse": {
+        "min": 0.8,
+        "max": 0.9
+      },
+      "sharedUseNote": "Совместное использование: если пиковые нагрузки функций не совпадают, допускается понижающий коэффициент 0,8–0,9 (с обоснованием).",
+      "refs": [
+        "СП 42.13330.2016, приложение Ж — нормативы стоянок (федеральный ориентир)",
+        "СП 113.13330.2023 — стоянки автомобилей: габариты, уклоны, места для МГН, зарядные станции",
+        "РНГП субъекта РФ (ст. 29.2 ГрК РФ) — приоритет над СП 42",
+        "ГПЗУ/ППТ — особые условия, приоритет над общими нормативами"
+      ]
+    }
+  },
+  "elevators": {
+    "title": "Лифты",
+    "document": {
+      "code": "СП 54.13330.2022; СП 118.13330; ГОСТ 34758-2021",
+      "fullTitle": "СП 54.13330.2022 «Здания жилые. Правила проектирования» (раздел о лифтах); СП 118.13330 (здания. Лифты); ГОСТ 34758-2021 (требования к лифтам)"
+    },
+    "purposes": [
+      { "id": "residential", "label": "Жилой (МКД)" },
+      { "id": "public", "label": "Общественный (школа / поликлиника / офис / ТЦ)" }
+    ],
+    "defaults": {
+      "floors": 10,
+      "passengerFlow": 0,
+      "loadCapacity": 400,
+      "speed": 1
+    },
+    "floorsHeightM": 3,
+    "rules": {
+      "residential": [
+        { "maxFloors": 4, "min": 0, "note": "До 4 этажей включительно лифты не требуются (справочно: при наличии квартир для МГН — 1 лифт, 181-ФЗ, ст. 15)" },
+        { "maxFloors": 10, "min": 1, "note": "5–10 этажей — не менее 1 пассажирского лифта (в т.ч. для МГН)" },
+        { "maxFloors": 16, "min": 2, "note": "11–16 этажей (высота до 50 м) — не менее 2 лифтов" },
+        { "maxFloors": 25, "min": 2, "note": "Высота 50–75 м — не менее 2 лифтов, один из которых грузопассажирский (≥ 1000 кг)" },
+        { "maxFloors": null, "min": 3, "note": "Высота свыше 75 м — не менее 3 лифтов, один грузопассажирский (≥ 1000 кг)" }
+      ],
+      "public": [
+        { "maxFloors": 1, "min": 0, "note": "1 этаж — лифт не требуется (справочно для МГН при наличии подъёма)" },
+        { "maxFloors": 3, "min": 1, "note": "2–3 этажа — не менее 1 лифта для маломобильных групп населения" },
+        { "maxFloors": null, "min": "flow", "note": "4 этажа и выше — по пассажиропотоку в час пик: 1 лифт на 500 чел/ч, не менее 1" }
+      ]
+    },
+    "flowPerElevator": 500,
+    "capacityByFloors": [
+      { "maxFloors": 10, "kg": 400 },
+      { "maxFloors": null, "kg": 630 }
+    ],
+    "capacityPublic": { "kg": 1000, "note": "Общественные здания (поликлиники, школы): лифт для МГН/носилок — 1000 кг (рабочее значение, сверить с ТЗ)" },
+    "speedByFloors": [
+      { "maxFloors": 10, "mps": 1 },
+      { "maxFloors": 17, "mps": 1.6 },
+      { "maxFloors": 25, "mps": 2 },
+      { "maxFloors": null, "mps": 2.5 }
+    ],
+    "refs": [
+      {
+        "point": "СП 54.13330.2022",
+        "requirement": "Количество лифтов в жилых зданиях по этажности/высоте; лифты для МГН (кабина не менее 1,4 × 2,15 × 2,45 м)",
+        "applied": "Минимальное количество по этажности; отдельно отмечается лифт для МГН"
+      },
+      {
+        "point": "СП 118.13330",
+        "requirement": "Лифты в общественных/производственных зданиях: количество, грузоподъёмность, скорость",
+        "applied": "Расчёт по пассажиропотоку в час пик; типовые параметры кабины"
+      },
+      {
+        "point": "ГОСТ 34758-2021",
+        "requirement": "Требования безопасности к лифтам (подъёмным механизмам), параметры кабины",
+        "applied": "Принятые грузоподъёмность и скорость сверяются с требованиями ГОСТ"
+      },
+      {
+        "point": "181-ФЗ, ст. 15; СП 59.13330.2020",
+        "requirement": "Доступность для МГН: лифт в зданиях с этажностью 2 и более (для МГН)",
+        "applied": "Минимум 1 лифт для МГН при этажности 2 и более"
+      }
+    ],
+    "note": "Значения — рабочие, требуют сверки с действующей редакцией СП и ТЗ на проектирование."
+  },
+  "tko": {
+    "title": "ТКО / ТБО",
+    "document": {
+      "code": "СанПиН 2.1.3684-21; СП 42.13330.2016",
+      "fullTitle": "СанПиН 2.1.3684-21 (п. 3, п. 11); СП 42.13330.2016 (п. 7.1, п. 7.5)"
+    },
+    "defaults": {
+      "n": 0.1,
+      "T": 3,
+      "containerLengthMm": 1377,
+      "containerWidthMm": 1077,
+      "containerHeightMm": 1369,
+      "containerVolume": 1.1,
+      "Kn": 1.25,
+      "Kz": 0.75,
+      "nPremises": 3,
+      "gapM": 0.35,
+      "wallOffsetM": 1,
+      "Kpr": 1.2,
+      "seasonalCoeff": 1,
+      "seasonalNote": "Сезонный коэффициент накопления (справочно, 1 — без учёта сезона); уточнить по региональному акту нормативов накопления ТКО.",
+      "density": 0.35,
+      "densityNote": "Плотность ТКО ρ = 0,35 т/м³ — рабочее значение для расчёта массы (M = V × ρ); уточнить по паспорту/акту регионального оператора.",
+      "fractions": [
+        { "id": "organic", "label": "Пищевые (органические) отходы", "percent": 50 },
+        { "id": "paper", "label": "Бумага и картон", "percent": 15 },
+        { "id": "plastic", "label": "Пластик", "percent": 12 },
+        { "id": "glass", "label": "Стекло", "percent": 8 },
+        { "id": "metal", "label": "Металл", "percent": 3 },
+        { "id": "other", "label": "Текстиль, дерево, прочее", "percent": 12 }
+      ],
+      "fractionsNote": "Типовая разбивка по фракциям (сумма 100 %) — справочно; актуальный состав ТКО утверждается для региона (ФЗ № 89-ФЗ, СанПиН 2.1.3684-21)."
+    },
+    "refs": [
+      {
+        "point": "СанПиН 2.1.3684-21, п. 11",
+        "requirement": "Срок временного накопления несортированных ТКО: при +5 °C и выше — не более 1 сут; при +4 °C и ниже — не более 3 сут",
+        "applied": "Период вывоза T задаётся (по умолчанию 3 сут)"
+      },
+      {
+        "point": "СанПиН 2.1.3684-21, п. 3",
+        "requirement": "Требования к размещению мест накопления ТКО (зазоры между контейнерами)",
+        "applied": "Зазор между контейнерами 0,35 м"
+      },
+      {
+        "point": "СП 42.13330.2016, п. 7.1",
+        "requirement": "Коэффициенты и нормы размещения площадок накопления ТКО",
+        "applied": "Коэффициент неравномерности накопления Kн = 1,25"
+      },
+      {
+        "point": "СП 42.13330.2016, п. 7.5",
+        "requirement": "Нормы размещения площадок накопления ТКО",
+        "applied": "Учитывается при размещении"
+      }
+    ]
+  },
+  "social": {
+    "title": "Социальное обеспечение",
+    "document": {
+      "code": "РНГП/МНГП региона; СП 158.13330.2014",
+      "fullTitle": "Региональные нормативы градостроительного проектирования субъекта РФ (ст. 29.2 ГрК РФ); СП 158.13330.2014 (поликлиники). Для г. Москвы — ПП № 2152-ПП (табл. 1.4.1), ПП № 2151-ПП (в ред. № 921-ПП от 28.04.2025)."
+    },
+    "populationMethod": "area",
+    "populationMethods": [
+      {
+        "id": "area",
+        "label": "По площади квартир (Sкв / площадь на человека)"
+      },
+      {
+        "id": "types",
+        "label": "По типам квартир (кол-во × коэффициент семейности)"
+      }
+    ],
+    "defaults": {
+      "sqmPerPerson": 33,
+      "polyclinicChildPer1000": 5.8,
+      "polyclinicAdultPer1000": 13.2,
+      "polyclinicMixedPer1000": 19,
+      "polyclinicAreaPerVisit": 27
+    },
+    "defaultZone": "zone1",
+    "zones": [
+      {
+        "id": "zone1",
+        "label": "Зона 1",
+        "douPer1000": 44,
+        "schoolPer1000": 90
+      },
+      {
+        "id": "zone2",
+        "label": "Зона 2",
+        "douPer1000": 63,
+        "schoolPer1000": 124
+      }
+    ],
+    "apartmentTypes": [
+      {
+        "id": "studio",
+        "label": "Студия",
+        "familyCoefficient": 1
+      },
+      {
+        "id": "k1",
+        "label": "1-комнатная",
+        "familyCoefficient": 1.5
+      },
+      {
+        "id": "k2",
+        "label": "2-комнатная / 2Е",
+        "familyCoefficient": 2.5
+      },
+      {
+        "id": "k3",
+        "label": "3-комнатная / 3Е",
+        "familyCoefficient": 3.2
+      },
+      {
+        "id": "k4",
+        "label": "4-комнатная / 4Е",
+        "familyCoefficient": 4
+      }
+    ],
+    "familyCoefficientNote": "Коэффициенты семейности (чел./квартиру) задаются в интерфейсе и подлежат уточнению — в ПП № 2152-ПП приведена площадь квартир на человека (33 м²/чел., табл. 1.4.1), а не коэффициенты по типам квартир. Значения по умолчанию — рабочие, замените на принятые в проекте.",
+    "minSizes": {
+      "dou": [
+        {
+          "maxPlaces": 125,
+          "sqmPerPlace": 27
+        },
+        {
+          "maxPlaces": 250,
+          "sqmPerPlace": 18
+        },
+        {
+          "maxPlaces": null,
+          "sqmPerPlace": 16
+        }
+      ],
+      "school": [
+        {
+          "maxPlaces": 550,
+          "sqmPerPlace": 35
+        },
+        {
+          "maxPlaces": 1000,
+          "sqmPerPlace": 15
+        },
+        {
+          "maxPlaces": null,
+          "sqmPerPlace": 15
+        }
+      ]
+    },
+    "refs": [
+      {
+        "point": "РНГП/МНГП региона (ст. 29.2 ГрК РФ)",
+        "requirement": "Расчётное население и минимально допустимый уровень обеспеченности объектами образования (ДОУ, школы) на 1000 жителей",
+        "applied": "Население и потребность в ДОУ/школах по выбранному региону и зоне"
+      },
+      {
+        "point": "СП 158.13330.2014",
+        "requirement": "Расчёт посещений поликлиник: детская — 5,8; взрослая — 13,2; смешанная — 19 пос./см. на 1000 жит.; удельная площадь 27 м² на посещение",
+        "applied": "Расчёт посещений и требуемой площади"
+      }
+    ],
+    "tiers": {
+      "high": {
+        "zones": [
+          {
+            "id": "zone1",
+            "label": "Зона 1",
+            "douPer1000": 44,
+            "schoolPer1000": 90
+          },
+          {
+            "id": "zone2",
+            "label": "Зона 2",
+            "douPer1000": 63,
+            "schoolPer1000": 124
+          }
+        ],
+        "defaultZone": "zone1",
+        "sqmPerPerson": 33
+      },
+      "medium": {
+        "zones": [
+          {
+            "id": "zone1",
+            "label": "Зона 1",
+            "douPer1000": 44,
+            "schoolPer1000": 90
+          },
+          {
+            "id": "zone2",
+            "label": "Зона 2",
+            "douPer1000": 63,
+            "schoolPer1000": 124
+          }
+        ],
+        "defaultZone": "zone1",
+        "sqmPerPerson": 33
+      },
+      "base": {
+        "zones": [
+          {
+            "id": "zone1",
+            "label": "Зона 1",
+            "douPer1000": 44,
+            "schoolPer1000": 90
+          },
+          {
+            "id": "zone2",
+            "label": "Зона 2",
+            "douPer1000": 63,
+            "schoolPer1000": 124
+          }
+        ],
+        "defaultZone": "zone1",
+        "sqmPerPerson": 33
+      }
+    }
+  }
+}
+</script>
+<script>
+  // Встраиваем нормы в window, чтобы работало оффлайн (file://)
+  try {
+    window.NORMS = JSON.parse(document.getElementById("norms-embed").textContent);
+  } catch (e) {
+    console.error("Ошибка разбора встроенной нормативной базы:", e);
+  }
+</script>
+
+<!-- Опционально: локальный SheetJS для XLSX. При отсутствии — экспорт идёт в CSV. -->
+<script src="assets/xlsx.min.js" onerror="console.warn('xlsx.min.js не найден — экспорт будет в CSV')"></script>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
