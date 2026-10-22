@@ -121,16 +121,26 @@ function initScenarios() {
 }
 
 async function loadNorms() {
-  // 1) Встроенный объект (работает оффлайн, file://) — из index.html
-  if (typeof window !== "undefined" && window.NORMS) {
-    return window.NORMS;
+  // 1) При работе через локальный сервер — внешний файл data/norms.json
+  //    (единый источник правды: правки подхватываются без перегенерации копии в index.html).
+  if (typeof window !== "undefined" && window.location && window.location.protocol !== "file:") {
+    try {
+      const res = await fetch("data/norms.json", { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        window.NORMS_SOURCE = "data/norms.json (внешний файл)";
+        console.info("[Калькулятор АР] Нормативная база загружена из data/norms.json");
+        return data;
+      }
+    } catch (_) {
+      /* файл недоступен — используем встроенную копию */
+    }
   }
-  // 2) Внешний JSON (при работе через локальный сервер)
-  try {
-    const res = await fetch("data/norms.json");
-    if (res.ok) return await res.json();
-  } catch (_) {
-    /* игнорируем, сработает fallback */
+  // 2) Встроенная копия (работает оффлайн, file://) — из index.html
+  if (typeof window !== "undefined" && window.NORMS) {
+    window.NORMS_SOURCE = "встроенная копия в index.html (офлайн-режим)";
+    console.info("[Калькулятор АР] Нормативная база загружена из встроенной копии (офлайн)");
+    return window.NORMS;
   }
   throw new Error("Нормативная база не найдена");
 }
@@ -161,7 +171,8 @@ function updateRegionNote() {
   const note = document.getElementById("regionNote");
   const region = currentRegion();
   if (note && region) {
-    note.textContent = `Источник РНГП/МНГП: ${region.source}. ${region.note || ""}`;
+    const src = typeof window !== "undefined" && window.NORMS_SOURCE ? ` · База: ${window.NORMS_SOURCE}` : "";
+    note.textContent = `Источник РНГП/МНГП: ${region.source}. ${region.note || ""}${src}`;
   }
 }
 
