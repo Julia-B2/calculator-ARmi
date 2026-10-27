@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Подписка «Солнцестояние» — Somniumsol</title>
+<meta name="description" content="Подписка на кофе Somniumsol: −10%, бесплатная доставка, пауза и отмена в один клик. Формат 1 кг раз в две недели или раз в месяц.">
+<meta name="theme-color" content="#F3E7D3">
+<link rel="icon" href="assets/img/illustrations/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/fonts/fonts.css">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Перейти к содержимому</a>
+<div id="site-header"></div>
+
+<main id="main">
+
+  <section class="sub-hero">
+    <div class="container">
+      <nav class="breadcrumbs" aria-label="Хлебные крошки" style="color:rgba(251,245,233,.55)"><a href="index.html">Главная</a><span>/</span><span>Подписка</span></nav>
+      <div class="sub-hero__grid">
+        <div data-reveal>
+          <div class="eyebrow eyebrow--light" style="margin-bottom:18px">Подписка «Солнцестояние»</div>
+          <h1>Кофе<br>по <em>расписанию</em></h1>
+        </div>
+        <div class="sub-hero__aside" data-reveal data-reveal-delay="1">
+          <p>Кофе приезжает к вашему ритуалу — раз в две недели или раз в месяц. Скидка 10% уже включена, доставка по России бесплатная. Пауза и отмена без звонков.</p>
+          <div class="subscription__benefits">
+            <span>−10% на каждый заказ</span>
+            <span>Бесплатная доставка</span>
+            <span>Пауза в один клик</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--paper">
+    <div class="container">
+      <div class="sub-config" id="sub-config" data-reveal>
+        <div class="sub-config__grid">
+          <div>
+            <div class="eyebrow">Конфигуратор</div>
+            <h2>Соберите свою орбиту</h2>
+            <p class="small" style="margin-bottom:26px">Выберите кофе, вес и частоту. Цена пересчитывается сразу.</p>
+
+            <div class="product-option">
+              <div class="product-option__head"><span class="product-option__label">Кофе</span><span class="product-option__hint">Можно менять каждый месяц</span></div>
+              <div class="option-row" id="sub-coffee-options"></div>
+            </div>
+
+            <div class="product-option">
+              <div class="product-option__head"><span class="product-option__label">Вес</span><span class="product-option__hint">Только 1 кг</span></div>
+              <div class="option-row" id="sub-weight-options"></div>
+            </div>
+
+            <div class="product-option">
+              <div class="product-option__head"><span class="product-option__label">Частота</span><span class="product-option__hint">Меняется в кабинете</span></div>
+              <div class="option-row" id="sub-frequency-options"></div>
+            </div>
+
+            <div class="product-option" style="margin-bottom:0">
+              <div class="product-option__head"><span class="product-option__label">Вес (всегда 1 кг)</span></div>
+            </div>
+          </div>
+
+          <div class="sub-config__aside">
+            <div>
+              <div class="eyebrow eyebrow--plain">Ваш план</div>
+              <div class="sub-config__price">
+                <b id="sub-price">1 280 ₽</b>
+                <span id="sub-old-price">1 540 ₽ разово</span>
+              </div>
+              <p class="sub-config__summary" id="sub-summary"></p>
+            </div>
+            <div>
+              <button class="btn btn--wide" type="button" id="sub-add"><span>Оформить подписку</span>
+                <svg class="btn__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg>
+              </button>
+              <p class="small" style="margin-top:14px;font-size:10px;line-height:1.6">Списание раз в период. Первый заказ можно отменить в течение 24 часов. Доставка включена в стоимость.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--dark">
+    <div class="container">
+      <div class="section-head">
+        <div data-reveal>
+          <span class="section-head__num" style="color:var(--amber)">Три плана</span>
+          <h2 class="section-head__title" style="color:var(--paper)">Выберите<br><em style="color:var(--amber)">ритм</em></h2>
+        </div>
+        <div class="section-head__aside" data-reveal data-reveal-delay="1">
+          <p style="color:rgba(251,245,233,.66)">План — это только ориентир по весу. Внутри конфигуратора можно изменить сорт и частоту.</p>
+        </div>
+      </div>
+      <div class="plan-grid" id="home-plans" data-plan-select></div>
+    </div>
+  </section>
+
+  <section class="section section--paper">
+    <div class="container">
+      <div class="section-head">
+        <div data-reveal>
+          <span class="section-head__num">Как это работает</span>
+          <h2 class="section-head__title">Три шага<br>до <em>света</em></h2>
+        </div>
+        <div class="section-head__aside" data-reveal data-reveal-delay="1">
+          <p>Никаких звонков и сложных кабинетов. Всё меняется в личном кабинете или одним сообщением в Telegram.</p>
+        </div>
+      </div>
+      <div class="how-grid" data-reveal>
+        <div class="how-step"><b>01</b><h4>Собираете план</h4><p>Сорт, вес и частота. Цена сразу видна — без сюрпризов на checkout.</p></div>
+        <div class="how-step"><b>02</b><h4>Получаете кофе</h4><p>Каждый заказ — новая пачка 1 кг к вашей дате. Доставка по России бесплатная.</p></div>
+        <div class="how-step"><b>03</b><h4>Меняете ритм</h4><p>Пауза, пропуск, замена сорта или отмена — в кабинете или в сообщении.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="faq">
+        <aside class="faq__aside" data-reveal>
+          <div class="eyebrow">Подписка</div>
+          <h2>Частые <em>вопросы</em></h2>
+          <p>Если что-то осталось неясным — напишите, ответим в рабочие часы.</p>
+          <a class="btn btn--sm btn--outline" href="delivery.html"><span>Условия доставки</span></a>
+        </aside>
+        <div class="faq__list" data-reveal data-reveal-delay="1">
+          <div class="faq__item">
+            <button class="faq__q" type="button">Можно ли поставить подписку на паузу? <span>+</span></button>
+            <div class="faq__a"><div class="faq__a-inner">Да, на любой срок. Пауза не влияет на скидку — при возобновлении цена останется прежней. Поставить на паузу можно в личном кабинете или сообщением в Telegram.</div></div>
+          </div>
+          <div class="faq__item">
+            <button class="faq__q" type="button">Можно менять сорт каждый месяц? <span>+</span></button>
+            <div class="faq__a"><div class="faq__a-inner">Конечно. Подписка — это не обязательство пить один и тот же кофе. Меняйте сорт и вес перед каждым списанием.</div></div>
+          </div>
+          <div class="faq__item">
+            <button class="faq__q" type="button">Когда списываются деньги? <span>+</span></button>
+            <div class="faq__a"><div class="faq__a-inner">В день формирования заказа — за 1–2 дня до отправки. Если списание не прошло, мы напишем и предложим повторить или перенести дату.</div></div>
+          </div>
+          <div class="faq__item">
+            <button class="faq__q" type="button">Доставка действительно бесплатная? <span>+</span></button>
+            <div class="faq__a"><div class="faq__a-inner">Да, для всех планов подписки по Москве и в большинство городов России. Для удалённых регионов стоимость рассчитывается индивидуально — мы предупредим заранее.</div></div>
+          </div>
+          <div class="faq__item">
+            <button class="faq__q" type="button">Как отменить подписку? <span>+</span></button>
+            <div class="faq__a"><div class="faq__a-inner">В один клик в личном кабинете или сообщением. Отмена действует со следующего списания; уже отправленный заказ придёт как обычно.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div id="site-footer"></div>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Сюрреалистичный кофейный пейзаж Somniumsol: солнце над плантацией">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F7EEDD"/>
+      <stop offset=".58" stop-color="#F1E4CF"/>
+      <stop offset="1" stop-color="#E9D7BC"/>
+    </linearGradient>
+    <linearGradient id="sunGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E58B55"/>
+      <stop offset="1" stop-color="#C85532"/>
+    </linearGradient>
+    <linearGradient id="hillFar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#B7B58A"/>
+      <stop offset="1" stop-color="#96996B"/>
+    </linearGradient>
+    <linearGradient id="hillMid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7F8451"/>
+      <stop offset="1" stop-color="#656B3E"/>
+    </linearGradient>
+    <linearGradient id="hillNear" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4D5534"/>
+      <stop offset="1" stop-color="#2E3520"/>
+    </linearGradient>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope=".055"/></feComponentTransfer>
+    </filter>
+    <filter id="soft"><feGaussianBlur stdDeviation="1.2"/></filter>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#sky)"/>
+
+  <!-- sun -->
+  <g>
+    <circle cx="1120" cy="268" r="196" fill="none" stroke="#C85532" stroke-width="0.8" opacity=".28"/>
+    <circle cx="1120" cy="268" r="172" fill="none" stroke="#C85532" stroke-width="0.9" opacity=".45"/>
+    <circle cx="1120" cy="268" r="150" fill="url(#sunGrad)"/>
+    <g stroke="#F7EEDD" stroke-width="1.1" opacity=".55">
+      <line x1="1120" y1="80" x2="1120" y2="104"/>
+      <line x1="1120" y1="432" x2="1120" y2="456"/>
+      <line x1="932" y1="268" x2="956" y2="268"/>
+      <line x1="1284" y1="268" x2="1308" y2="268"/>
+      <line x1="987" y1="135" x2="1004" y2="152"/>
+      <line x1="1236" y1="384" x2="1253" y2="401"/>
+      <line x1="1253" y1="135" x2="1236" y2="152"/>
+      <line x1="1004" y1="384" x2="987" y2="401"/>
+    </g>
+    <circle cx="1120" cy="268" r="118" fill="none" stroke="#F7EEDD" stroke-width="0.8" opacity=".25"/>
+    <path d="M1010 292c34-10 62-9 96 3s65 12 98 1" fill="none" stroke="#F7EEDD" stroke-width="1.1" opacity=".4"/>
+    <path d="M1032 318c34-9 58-7 88 4s58 8 86-1" fill="none" stroke="#F7EEDD" stroke-width="1" opacity=".28"/>
+  </g>
+
+  <!-- birds -->
+  <g fill="none" stroke="#3B3227" stroke-width="1.2" opacity=".55">
+    <path d="M370 210c10-9 19-9 29 0 10-9 19-9 29 0"/>
+    <path d="M438 244c7-6 13-6 20 0 7-6 13-6 20 0"/>
+    <path d="M300 270c6-5 11-5 17 0 6-5 11-5 17 0"/>
+  </g>
+
+  <!-- distant hills -->
+  <path d="M0 520C180 470 340 452 520 490c180 38 312 26 478-10 166-36 360-42 602 12v408H0Z" fill="url(#hillFar)" opacity=".75"/>
+  <path d="M0 590c210-54 386-38 552 8 166 45 330 55 506 16 190-42 356-38 542 12v274H0Z" fill="url(#hillMid)"/>
+
+  <!-- plantation rows -->
+  <g fill="none" stroke="#3E4529" stroke-width="1.1" opacity=".5">
+    <path d="M-40 640c260-64 430-56 620-6 210 55 390 60 620 4 180-44 320-34 440 6"/>
+    <path d="M-40 676c280-62 452-50 646 2 200 54 388 54 616-2 176-42 300-30 418 8"/>
+    <path d="M-40 714c300-58 470-44 668 8 204 53 384 48 604-6 172-42 300-26 408 10"/>
+    <path d="M-40 754c320-54 486-38 690 14 206 52 378 42 592-10 168-40 292-22 398 12"/>
+    <path d="M-40 796c340-50 504-32 712 20 208 52 372 36 580-14 164-38 284-18 388 14"/>
+  </g>
+
+  <!-- near hill -->
+  <path d="M0 760c238-54 430-30 620 18 220 55 406 42 590-8 156-42 274-38 390 8v122H0Z" fill="url(#hillNear)"/>
+  <path d="M0 826c220-38 406-20 590 22 210 48 410 32 610-16 140-34 268-28 400 10v58H0Z" fill="#211B14"/>
+
+  <!-- foreground coffee branches -->
+  <g fill="none" stroke="#17130F" stroke-width="2.2" stroke-linecap="round">
+    <path d="M120 900c20-120 62-204 138-278"/>
+    <path d="M258 900c-10-96 18-180 84-252"/>
+    <path d="M1480 900c-22-114-66-196-142-266"/>
+    <path d="M1350 900c12-92-14-174-76-244"/>
+  </g>
+  <g fill="#2D3B22" stroke="#17130F" stroke-width="1">
+    <path d="M176 716c-40-24-58-12-64 8 20 22 48 24 64-8Z"/>
+    <path d="M190 676c-16-38 2-54 22-52 12 26 2 50-22 52Z"/>
+    <path d="M230 632c-34-26-30-48-10-58 24 14 30 38 10 58Z"/>
+    <path d="M272 600c-2-38 18-48 34-40 4 26-10 44-34 40Z"/>
+    <path d="M1468 706c40-26 60-14 66 6-20 22-48 26-66-6Z"/>
+    <path d="M1450 666c18-36 0-54-20-52-12 26-2 50 20 52Z"/>
+    <path d="M1408 624c34-26 28-48 8-58-24 14-28 38-8 58Z"/>
+    <path d="M1366 594c2-38-18-48-34-40-4 26 10 44 34 40Z"/>
+  </g>
+  <g fill="#B9432C" stroke="#17130F" stroke-width=".8">
+    <circle cx="210" cy="736" r="7"/><circle cx="238" cy="704" r="6"/><circle cx="264" cy="666" r="7"/>
+    <circle cx="214" cy="664" r="6"/><circle cx="252" cy="632" r="7"/><circle cx="288" cy="614" r="6"/>
+    <circle cx="1436" cy="730" r="7"/><circle cx="1408" cy="698" r="6"/><circle cx="1382" cy="660" r="7"/>
+    <circle cx="1432" cy="658" r="6"/><circle cx="1394" cy="626" r="7"/><circle cx="1358" cy="608" r="6"/>
+  </g>
+
+  <!-- decorative frame -->
+  <g fill="none" stroke="#211B14" stroke-width="1">
+    <rect x="34" y="34" width="1532" height="832" opacity=".5"/>
+    <rect x="46" y="46" width="1508" height="808" opacity=".28"/>
+  </g>
+  <g fill="#211B14" opacity=".7">
+    <circle cx="34" cy="34" r="3"/><circle cx="1566" cy="34" r="3"/><circle cx="34" cy="866" r="3"/><circle cx="1566" cy="866" r="3"/>
+  </g>
+
+  <rect width="1600" height="900" filter="url(#grain)" opacity=".7"/>
+</svg>

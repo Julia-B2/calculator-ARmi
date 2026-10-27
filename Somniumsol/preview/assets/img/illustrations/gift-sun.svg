@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Набор «Солнце в чашке»">
+  
+  <g fill="none" stroke="#221812" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M150 320h250v90c0 60-50 100-125 100s-125-40-125-100Z" fill="#FBF5E9"/>
+    <path d="M400 340h35c40 0 55 25 55 48 0 30-25 48-65 48h-25" fill="#FBF5E9"/>
+    <ellipse cx="275" cy="320" rx="125" ry="32" fill="#FBF5E9"/>
+    <ellipse cx="275" cy="320" rx="95" ry="20" fill="#B9552F" opacity=".9"/>
+    <path d="M275 300c-18-28 8-44 0-70M330 300c-18-28 8-44 0-70M220 300c-18-28 8-44 0-70" stroke="#B9552F" stroke-width="1.4" opacity=".7"/>
+    <path d="M95 545h410" stroke-width="1.2"/>
+    <path d="M155 520c40-18 80-26 120-26s80 8 120 26" stroke-width="1.2" opacity=".5"/>
+  </g>
+  <g fill="none" stroke="#B9552F" stroke-width="1.6">
+    <circle cx="300" cy="92" r="34"/>
+    <circle cx="300" cy="92" r="16" fill="#B9552F" stroke="none"/>
+    <line x1="300" y1="44" x2="300" y2="54"/><line x1="300" y1="130" x2="300" y2="140"/>
+    <line x1="252" y1="92" x2="262" y2="92"/><line x1="338" y1="92" x2="348" y2="92"/>
+    <line x1="266" y1="58" x2="273" y2="65"/><line x1="327" y1="119" x2="334" y2="126"/>
+    <line x1="334" y1="58" x2="327" y2="65"/><line x1="273" y1="119" x2="266" y2="126"/>
+  </g>
+  <text x="300" y="190" text-anchor="middle" font-family="Georgia, serif" font-size="22" letter-spacing="6" fill="#221812">SOL</text>
+  <text x="300" y="216" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" letter-spacing="3" fill="#6B5A4A">A GIFT OF WARMTH</text>
+</svg>

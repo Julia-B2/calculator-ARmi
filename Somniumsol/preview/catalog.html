@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Каталог кофе — Somniumsol</title>
+<meta name="description" content="Epico, Sidamo и Mariposa — 100% арабика от Somniumsol. Формат 1 кг. Доставка по России.">
+<meta name="theme-color" content="#F3E7D3">
+<link rel="icon" href="assets/img/illustrations/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/fonts/fonts.css">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Перейти к содержимому</a>
+<div id="site-header"></div>
+
+<main id="main">
+
+  <section class="page-hero">
+    <div class="container">
+      <nav class="breadcrumbs" aria-label="Хлебные крошки"><a href="index.html">Главная</a><span>/</span><span>Каталог</span></nav>
+      <div class="page-hero__grid">
+        <div data-reveal>
+          <div class="eyebrow" style="margin-bottom:18px">Кофейные директории</div>
+          <h1>Три солнца.<br><em>Выбирайте</em> своё.</h1>
+        </div>
+        <div class="page-hero__aside" data-reveal data-reveal-delay="1">
+          <p>Все лоты — 100% арабика в формате 1 кг.</p>
+          <div class="hero__micro" style="gap:6px 18px">
+            <span>Только 1 кг</span>
+            <span>В зёрнах</span>
+            <span>Доставка от 1 дня</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container">
+      <div class="filters" data-reveal>
+        <div class="filter-group" role="group" aria-label="Фильтр по обжарке">
+          <span class="filter-label">Обжарка</span>
+          <button class="chip is-active" type="button" data-filter-roast="all">Все</button>
+          <button class="chip" type="button" data-filter-roast="dark">Тёмная</button>
+          <button class="chip" type="button" data-filter-roast="light">Светлая</button>
+          <button class="chip" type="button" data-filter-roast="medium">Средняя</button>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label" id="catalog-count">3 из 3</span>
+          <label class="sr-only" for="catalog-sort">Сортировка</label>
+          <select class="sort-select" id="catalog-sort">
+            <option value="default">По умолчанию</option>
+            <option value="price-asc">Сначала дешевле</option>
+            <option value="price-desc">Сначала дороже</option>
+            <option value="name">По названию</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="catalog-grid" id="catalog-grid"></div>
+
+      <div class="catalog-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4C10 4 4 9 4 16c0 2 1 3 2 4 6-1 12-5 14-16Z"/><path d="M6 18c3-5 7-8 11-10"/></svg>
+        <span>Не знаете, с чего начать? <a class="link-underline" style="display:inline-flex;border-bottom:0;padding:0" href="#quiz-link">Пройдите подбор вкуса</a> или возьмите набор «Сон в подарок» — три сорта по 1 кг.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--paper" id="formats">
+    <div class="container">
+      <div class="section-head">
+        <div data-reveal>
+          <span class="section-head__num">Форматы</span>
+          <h2 class="section-head__title">Кофе, который<br>едет с <em>вами</em></h2>
+        </div>
+        <div class="section-head__aside" data-reveal data-reveal-delay="1">
+          <p>Подписка для тех, кто не хочет думать о запасах: кофе приезжает по вашему расписанию, скидка 10% и бесплатная доставка уже включены.</p>
+        </div>
+      </div>
+      <div class="format-grid" id="format-grid"></div>
+    </div>
+  </section>
+
+  <section class="section section--dark" id="quiz-link">
+    <div class="container">
+      <div class="section-head" style="margin-bottom:0">
+        <div data-reveal>
+          <span class="section-head__num" style="color:var(--amber)">Подбор</span>
+          <h2 class="section-head__title" style="color:var(--paper)">Не знаете,<br>что <em style="color:var(--amber)">выбрать?</em></h2>
+        </div>
+        <div class="section-head__aside" data-reveal data-reveal-delay="1">
+          <p style="color:rgba(251,245,233,.66)">Ответьте на три вопроса — предложим лот и вес. Это займёт меньше минуты.</p>
+          <a class="btn btn--light" href="index.html#quiz"><span>Пройти подбор</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div id="site-footer"></div>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

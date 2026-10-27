@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Набор «Два берега»">
+  
+  <g fill="none" stroke="#221812" stroke-width="2" stroke-linejoin="round">
+    <path d="M110 260h180v250H110Z" fill="#FBF5E9"/>
+    <path d="M290 260l55 38v212H110V260" fill="none"/>
+    <path d="M110 260l55-38h180l-55 38" fill="#FBF5E9"/>
+    <path d="M345 298l55-38v212l-55 38" fill="#E5D1B4"/>
+    <path d="M385 300c50-16 82 6 82 44 0 40-32 62-82 50" fill="#FBF5E9"/>
+    <path d="M110 420h235" opacity=".35"/>
+    <path d="M150 300h100M150 322h70" opacity=".55"/>
+    <circle cx="200" cy="375" r="30" fill="#B9552F" stroke="none"/>
+    <path d="M178 375c12-12 32-12 44 0" stroke="#FBF5E9" stroke-width="1.2"/>
+  </g>
+  <g fill="none" stroke="#B9552F" stroke-width="1.4">
+    <circle cx="430" cy="150" r="28"/>
+    <line x1="430" y1="108" x2="430" y2="118"/><line x1="430" y1="182" x2="430" y2="192"/>
+    <line x1="388" y1="150" x2="398" y2="150"/><line x1="462" y1="150" x2="472" y2="150"/>
+  </g>
+  <text x="300" y="90" text-anchor="middle" font-family="Georgia, serif" font-size="22" letter-spacing="5" fill="#221812">TWO SHORES</text>
+  <text x="300" y="116" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" letter-spacing="3" fill="#6B5A4A">EPICO · SIDAMO</text>
+  <text x="300" y="555" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" letter-spacing="3" fill="#6B5A4A">A GIFT OF CONTRAST</text>
+</svg>

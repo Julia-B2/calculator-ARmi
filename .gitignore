@@ -26,3 +26,7 @@ $RECYCLE.BIN/
 # Python (кэш и байт-код)
 __pycache__/
 *.pyc
+
+# Python venv (Somniumsol)
+.venv/
+venv/

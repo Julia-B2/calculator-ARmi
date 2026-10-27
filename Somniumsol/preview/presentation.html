@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Презентация обновления Somniumsol</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    :root { --slide-bg: #F3E7D3; --accent: #B9552F; }
+    body { background: var(--slide-bg); color: var(--espresso); font-family: var(--sans); margin: 0; overflow-x: hidden; }
+    .pres-container { max-width: 1100px; margin: 0 auto; padding: 60px 20px; }
+    .slide { 
+      background: white; border-radius: 24px; padding: 60px; margin-bottom: 80px; 
+      box-shadow: 0 20px 40px rgba(33,26,20,0.08); 
+      display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+      transition: transform 0.3s ease;
+    }
+    .slide:hover { transform: translateY(-5px); }
+    .slide.full { grid-template-columns: 1fr; text-align: center; }
+    .slide h2 { font-family: var(--serif); font-size: 42px; margin-bottom: 24px; color: var(--espresso); }
+    .slide p { font-size: 18px; line-height: 1.6; color: var(--muted); margin-bottom: 32px; }
+    .slide .feature-list { list-style: none; padding: 0; }
+    .slide .feature-list li { 
+      display: flex; align-items: center; gap: 12px; margin-bottom: 16px; 
+      font-size: 17px; font-weight: 500; 
+    }
+    .slide .feature-list li::before { 
+      content: '✓'; background: var(--terracotta); color: white; 
+      width: 22px; height: 22px; border-radius: 50%; 
+      display: flex; align-items: center; justify-content: center; font-size: 12px;
+    }
+    .visual-block { background: var(--cream); border-radius: 16px; padding: 30px; 
+      display: flex; justify-content: center; align-items: center; 
+      border: 1px solid var(--line); min-height: 400px; 
+    }
+    .logo-showcase { text-align: center; width: 100%; }
+    .logo-showcase img { max-width: 420px; height: auto; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1)); }
+    .pack-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; }
+    .pack-item { text-align: center; }
+    .pack-item img { width: 100%; height: auto; border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+    .pack-item span { display: block; margin-top: 12px; font-family: var(--serif); font-weight: 600; font-size: 16px; }
+    .cta-block { text-align: center; padding: 80px 0; }
+    .btn-pres { 
+      background: var(--espresso); color: white; padding: 20px 40px; 
+      border-radius: 40px; text-decoration: none; font-weight: 700; 
+      font-size: 20px; transition: all 0.3s; display: inline-block;
+    }
+    .btn-pres:hover { background: var(--terracotta); transform: scale(1.05); }
+    .tag { 
+      display: inline-block; padding: 6px 12px; background: rgba(185,85,47,0.1); 
+      color: var(--terracotta); border-radius: 6px; font-size: 12px; 
+      font-weight: 700; text-transform: uppercase; margin-bottom: 16px; 
+    }
+    @media (max-width: 900px) {
+      .slide { grid-template-columns: 1fr; padding: 40px 20px; }
+      .slide h2 { font-size: 32px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="pres-container">
+    <div class="slide full">
+      <div class="tag">Обновление 2026</div>
+      <h2>Somniumsol: Редизайн & Контент</h2>
+      <p>Презентация обновленного цифрового облика бренда. <br>Акцент на сохранении аутентичности, премиальности и прозрачности коммуникаций.</p>
+    </div>
+
+    <div class="slide">
+      <div class="content">
+        <div class="tag">Идентичность</div>
+        <h2>Логотип и Визуал</h2>
+        <p>Мы полностью отказались от текстовой имитации в пользу оригинального каллиграфического знака бренда. Это возвращает сайту статус «авторского» продукта.</p>
+        <ul class="feature-list">
+          <li>Использование оригинального wordmark</li>
+          <li>Монохромная палитра (Черный/Кремовый)</li>
+          <li>Соблюдение безопасных зон и пропорций</li>
+        </ul>
+      </div>
+      <div class="visual-block">
+        <div class="logo-showcase">
+          <img src="assets/img/logo-somniumsol.png" alt="Logo Dark">
+          <div style="height:40px"></div>
+          <div style="background: var(--espresso); padding: 20px; border-radius: 12px; display: inline-block;">
+            <img src="assets/img/logo-somniumsol-light.png" alt="Logo Light" style="max-width: 280px;">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="content">
+        <div class="tag">Продукт</div>
+        <h2>Обновленная Линейка</h2>
+        <p>Этикетки на пачках сохранены в оригинальном дизайне. Мы заменили только названия продуктов, используя идентичный шрифт и стиль.</p>
+        <ul class="feature-list">
+          <li>Сохранен дизайн оригинальных этикеток</li>
+          <li>Новые имена: Epico, Sidamo, Mariposa</li>
+          <li>Соблюдена иерархия: 100% Арабика</li>
+          <li>Только формат 1 кг — 2 550–2 780 ₽</li>
+        </ul>
+      </div>
+      <div class="visual-block">
+        <div class="pack-grid">
+          <div class="pack-item">
+            <img src="assets/img/products/epico.png" alt="Epico">
+            <span>Epico</span>
+          </div>
+          <div class="pack-item">
+            <img src="assets/img/products/sidamo.png" alt="Sidamo">
+            <span>Sidamo</span>
+          </div>
+          <div class="pack-item">
+            <img src="assets/img/products/mariposa.png" alt="Mariposa">
+            <span>Mariposa</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="content">
+        <div class="tag">Сервис</div>
+        <h2>Прозрачность и Доверие</h2>
+        <p>Мы актуализировали информацию о сборке подарочных наборов, чтобы управлять ожиданиями клиента и повысить лояльность.</p>
+        <ul class="feature-list">
+          <li>Срок сборки: 2–3 рабочих дня</li>
+          <li>Уточнение состава при подтверждении заказа</li>
+          <li>Честная коммуникация по этикеткам</li>
+        </ul>
+      </div>
+      <div class="visual-block" style="flex-direction: column; text-align: center;">
+        <div style="background: white; padding: 30px; border-radius: 12px; border-left: 4px solid var(--terracotta); box-shadow: 0 10px 20px rgba(0,0,0,0.05); max-width: 80%;">
+          <p style="color: var(--espresso); font-family: var(--serif); font-size: 20px; font-style: italic; margin-bottom: 0;">
+            «Сборка 2–3 дня. Этикетки под заказ не печатаем — срок и состав уточняем при подтверждении»
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="cta-block">
+      <h2>Готовы к запуску?</h2>
+      <p>Посмотрите, как всё работает в реальном времени на интерактивном сайте.</p>
+      <a href="index.html" class="btn-pres">Перейти к полноценному Preview</a>
+    </div>
+  </div>
+</body>
+</html>

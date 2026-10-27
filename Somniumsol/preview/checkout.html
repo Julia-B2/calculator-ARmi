@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Оформление заказа — Somniumsol</title>
+<meta name="description" content="Оформите заказ кофе Somniumsol: доставка курьером по Москве, СДЭК или Почтой России. Оплата картой, СБП или при получении.">
+<meta name="theme-color" content="#F3E7D3">
+<link rel="icon" href="assets/img/illustrations/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/fonts/fonts.css">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Перейти к содержимому</a>
+<div id="site-header"></div>
+
+<main id="main">
+  <section class="checkout">
+    <div class="container">
+
+      <div class="checkout__head">
+        <nav class="breadcrumbs" aria-label="Хлебные крошки"><a href="index.html">Главная</a><span>/</span><span>Оформление</span></nav>
+        <h1>Почти <em>готово</em></h1>
+        <p class="lead" style="margin-top:14px">Заполните контакты и выберите доставку. Оплата — на следующем шаге.</p>
+      </div>
+
+      <!-- Empty state -->
+      <div class="cart-empty" id="checkout-empty" style="display:none;padding:60px 0">
+        <div class="cart-empty__icon">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+        </div>
+        <h4>В корзине пока пусто</h4>
+        <p>Начните с трёх солнц — Epico, Sidamo или Mariposa.</p>
+        <a class="btn btn--sm" href="catalog.html"><span>Перейти в каталог</span></a>
+      </div>
+
+      <div id="checkout-main">
+        <div class="checkout__grid">
+
+          <form class="checkout__form" id="checkout-form" novalidate>
+
+            <div class="form-block">
+              <div class="form-block__head"><h2>1. Контакты</h2><span>Для связи по заказу</span></div>
+              <div class="form-row">
+                <div class="field">
+                  <label for="name">Имя</label>
+                  <input id="name" name="name" type="text" autocomplete="name" placeholder="Как к вам обращаться" data-required>
+                </div>
+                <div class="field">
+                  <label for="phone">Телефон</label>
+                  <input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="+7 (___) ___-__-__" data-required>
+                </div>
+              </div>
+              <div class="form-row form-row--full" style="margin-bottom:0">
+                <div class="field">
+                  <label for="email">Email</label>
+                  <input id="email" name="email" type="email" autocomplete="email" placeholder="Для чека и уведомлений">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-block">
+              <div class="form-block__head"><h2>2. Доставка</h2><span>Москва и Россия</span></div>
+
+              <div class="free-moscow" data-free-moscow hidden>
+                <button type="button" class="btn btn--sm free-moscow__btn" data-free-moscow-apply>Бесплатная доставка по Москве</button>
+                <p>В корзине 5 пачек и больше — курьер по Москве бесплатно.</p>
+              </div>
+
+              <label class="delivery-option is-active">
+                <input type="radio" name="delivery" value="moscow" checked>
+                <div class="delivery-option__body">
+                  <b>Курьер по Москве <span>390 ₽</span></b>
+                  <p>1–2 дня, в пределах МКАД. Бесплатно от 5 пачек.</p>
+                </div>
+              </label>
+              <label class="delivery-option">
+                <input type="radio" name="delivery" value="cdek">
+                <div class="delivery-option__body">
+                  <b>СДЭК <span>290 ₽</span></b>
+                  <p>2–5 дней, пункты выдачи по России. Бесплатно от 5 пачек.</p>
+                </div>
+              </label>
+              <label class="delivery-option">
+                <input type="radio" name="delivery" value="post">
+                <div class="delivery-option__body">
+                  <b>Почта России <span>350 ₽</span></b>
+                  <p>3–7 дней, до ближайшего отделения.</p>
+                </div>
+              </label>
+
+              <div id="address-field" style="margin-top:16px">
+                <div class="form-row">
+                  <div class="field">
+                    <label for="city">Город</label>
+                    <input id="city" name="city" type="text" autocomplete="address-level2" placeholder="Москва">
+                  </div>
+                  <div class="field">
+                    <label for="address">Адрес / пункт выдачи</label>
+                    <input id="address" name="address" type="text" autocomplete="street-address" placeholder="Улица, дом, квартира">
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row form-row--full" style="margin-bottom:0">
+                <div class="field">
+                  <label for="comment">Комментарий</label>
+                  <textarea id="comment" name="comment" placeholder="Подъезд, домофон, текст открытки — всё, что важно знать"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-block">
+              <div class="form-block__head"><h2>3. Оплата</h2><span>Безопасно</span></div>
+
+              <div class="demo-note">
+                <b>Демонстрационный режим.</b> Реальная оплата не проводится. В рабочей версии здесь подключаются ЮKassa и CloudPayments: карта, СБП, оплата при получении. Ключи магазина и домен добавляются на этапе запуска.
+              </div>
+
+              <label class="payment-option is-active">
+                <input type="radio" name="payment" value="yookassa-card" checked>
+                <div class="delivery-option__body">
+                  <b>Картой онлайн · ЮKassa</b>
+                  <p>Visa, Mastercard, МИР. Перенаправление на защищённую страницу оплаты.</p>
+                </div>
+              </label>
+              <label class="payment-option">
+                <input type="radio" name="payment" value="sbp">
+                <div class="delivery-option__body">
+                  <b>СБП</b>
+                  <p>Оплата по QR-коду из приложения банка. Без комиссии.</p>
+                </div>
+              </label>
+              <label class="payment-option">
+                <input type="radio" name="payment" value="cloudpayments">
+                <div class="delivery-option__body">
+                  <b>Картой онлайн · CloudPayments</b>
+                  <p>Альтернативный провайдер. Подключается по выбору магазина.</p>
+                </div>
+              </label>
+              <label class="payment-option">
+                <input type="radio" name="payment" value="cash">
+                <div class="delivery-option__body">
+                  <b>При получении</b>
+                  <p>Курьеру или в пункте выдачи. Доступно для Москвы и СДЭК.</p>
+                </div>
+              </label>
+
+              <label class="checkbox" style="margin-top:18px">
+                <input type="checkbox" id="agree" name="agree" data-required>
+                <span>Согласен с <a href="legal.html">условиями оферты</a> и <a href="legal.html#privacy">политикой конфиденциальности</a>. Понимаю, что это демонстрационный заказ.</span>
+              </label>
+            </div>
+
+          </form>
+
+          <aside class="checkout__summary">
+            <h2>Ваш заказ</h2>
+            <div class="summary-items" id="summary-items"></div>
+
+            <div class="promo-row">
+              <label class="sr-only" for="promo-input">Промокод</label>
+              <input id="promo-input" type="text" placeholder="Промокод" autocomplete="off">
+              <button type="button" id="promo-apply">Применить</button>
+            </div>
+            <div class="promo-message" id="promo-message" role="status" aria-live="polite"></div>
+
+            <div class="summary-totals" id="summary-totals"></div>
+
+            <button class="btn btn--wide" type="submit" form="checkout-form"><span>Оформить заказ</span>
+              <svg class="btn__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg>
+            </button>
+            <p class="small">Нажимая «Оформить заказ», вы подтверждаете демонстрационный характер покупки. Данные сохраняются только в вашем браузере.</p>
+          </aside>
+
+        </div>
+      </div>
+
+      <div class="checkout-success" id="checkout-success">
+        <div class="checkout-success__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>
+        </div>
+        <h1>Заказ собран</h1>
+        <p>Спасибо! Это демонстрационный заказ — он сохранён в вашем браузере. Чтобы подтвердить его по-настоящему, отправьте состав менеджеру в WhatsApp или Telegram.</p>
+        <div class="order-number">Заказ № <span id="success-number">—</span></div>
+        <p id="success-details" class="small"></p>
+        <div class="checkout-success__actions">
+          <a class="btn" id="success-wa" href="#" target="_blank" rel="noopener"><span>Отправить в WhatsApp</span></a>
+          <a class="btn btn--outline" id="success-tg" href="#" target="_blank" rel="noopener"><span>Написать в Telegram</span></a>
+          <a class="btn btn--ghost" href="catalog.html"><span>Вернуться в каталог</span></a>
+        </div>
+      </div>
+
+      <div class="demo-note" style="max-width:720px;margin:40px auto 0">
+        <b>О превью:</b> корзина, промокоды, расчёт доставки и оформление работают на стороне браузера. Товары и цены — демонстрационные. Подключение платежей и учёт заказов описаны в документации к проекту.
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<div id="site-footer"></div>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

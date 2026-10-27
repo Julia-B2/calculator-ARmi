@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" role="img" aria-label="Somniumsol — кофе 100% арабика">
+  <defs>
+    <path id="badgeCircle" d="M110,110 m-86,0 a86,86 0 1,1 172,0 a86,86 0 1,1 -172,0"/>
+    <path id="badgeCircleInner" d="M110,110 m-66,0 a66,66 0 1,1 132,0 a66,66 0 1,1 -132,0"/>
+  </defs>
+  <circle cx="110" cy="110" r="100" fill="#F3E7D3"/>
+  <g fill="none" stroke="#221812" stroke-width="0.9">
+    <circle cx="110" cy="110" r="104" opacity=".35"/>
+    <circle cx="110" cy="110" r="96" opacity=".55"/>
+  </g>
+  <g fill="#B9552F">
+    <circle cx="110" cy="110" r="27"/>
+  </g>
+  <g stroke="#B9552F" stroke-width="1.4" stroke-linecap="round">
+    <g id="rays">
+      <line x1="110" y1="70" x2="110" y2="58"/>
+      <line x1="110" y1="150" x2="110" y2="162"/>
+      <line x1="70" y1="110" x2="58" y2="110"/>
+      <line x1="150" y1="110" x2="162" y2="110"/>
+      <line x1="82" y1="82" x2="73" y2="73"/>
+      <line x1="138" y1="138" x2="147" y2="147"/>
+      <line x1="138" y1="82" x2="147" y2="73"/>
+      <line x1="82" y1="138" x2="73" y2="147"/>
+    </g>
+  </g>
+  <g fill="#F6EEDF">
+    <circle cx="110" cy="110" r="18"/>
+  </g>
+  <g fill="#B9552F">
+    <circle cx="110" cy="110" r="7"/>
+  </g>
+  <text font-family="Georgia, serif" font-size="9.2" letter-spacing="3.2" fill="#221812">
+    <textPath href="#badgeCircle" startOffset="2%">SOMNIUMSOL · COFFEE · MOSCOW · SINCE 2019 ·</textPath>
+  </text>
+  <text font-family="Georgia, serif" font-size="7.6" letter-spacing="2.6" fill="#6B5A4A">
+    <textPath href="#badgeCircleInner" startOffset="12%">100% ARABICA · EST. 2019 ·</textPath>
+  </text>
+</svg>

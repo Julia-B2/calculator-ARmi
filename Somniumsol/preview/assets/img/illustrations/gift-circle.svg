@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Набор «Полный круг»">
+  
+  <g fill="none" stroke="#221812" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M180 210h220l-40 120H220Z" fill="#FBF5E9"/>
+    <path d="M220 330h140v45H220Z" fill="#FBF5E9"/>
+    <path d="M260 375v105h60V375" fill="#FBF5E9"/>
+    <path d="M195 480h190" />
+    <path d="M245 210c8-38 34-58 68-58s60 20 68 58" fill="none"/>
+    <path d="M300 152v-45" />
+    <path d="M280 118l20-22 20 22" />
+    <path d="M240 245h110" opacity=".4"/>
+  </g>
+  <g fill="none" stroke="#6E7446" stroke-width="1.4">
+    <path d="M130 510c30-50 72-72 126-72s96 22 126 72" opacity=".6"/>
+    <circle cx="300" cy="90" r="28"/>
+    <line x1="300" y1="48" x2="300" y2="58"/><line x1="300" y1="122" x2="300" y2="132"/>
+    <line x1="258" y1="90" x2="268" y2="90"/><line x1="332" y1="90" x2="342" y2="90"/>
+  </g>
+  <text x="300" y="555" text-anchor="middle" font-family="Georgia, serif" font-size="21" letter-spacing="5" fill="#221812">FULL CIRCLE</text>
+  <text x="300" y="578" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" letter-spacing="3" fill="#6B5A4A">COFFEE · V60 · FILTERS</text>
+</svg>

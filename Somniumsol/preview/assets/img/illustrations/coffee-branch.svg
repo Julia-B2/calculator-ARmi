@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Ветка кофе">
+  <g fill="none" stroke="#221812" stroke-width="2" stroke-linecap="round">
+    <path d="M40 360C100 250 190 170 340 100"/>
+    <path d="M120 300c-34-6-54 12-58 36 26 8 48-6 58-36Z" fill="#6E7446" stroke="none"/>
+    <path d="M150 270c-10-32 10-50 34-50 4 26-10 46-34 50Z" fill="#6E7446" stroke="none"/>
+    <path d="M200 228c-34-6-54 12-58 36 26 8 48-6 58-36Z" fill="#6E7446" stroke="none"/>
+    <path d="M230 198c-10-32 10-50 34-50 4 26-10 46-34 50Z" fill="#6E7446" stroke="none"/>
+    <path d="M280 158c-34-6-54 12-58 36 26 8 48-6 58-36Z" fill="#6E7446" stroke="none"/>
+    <circle cx="132" cy="330" r="9" fill="#B9552F" stroke="none"/>
+    <circle cx="178" cy="292" r="8" fill="#B9552F" stroke="none"/>
+    <circle cx="212" cy="258" r="9" fill="#B9552F" stroke="none"/>
+    <circle cx="258" cy="222" r="8" fill="#B9552F" stroke="none"/>
+    <circle cx="296" cy="186" r="9" fill="#B9552F" stroke="none"/>
+  </g>
+</svg>
